@@ -6,7 +6,7 @@ This class is a port of the original Sphinx API class by **Andrew Aksyonoff** an
 ### New methods for SphinxClient
 While all the existing methods available and vastly documented in the [Sphinx Documentation][2], this version of the SphinxClient for PHP includes a new method.
 
-* **RemoveFilter**: removes a filter previously set.
+* **removeFilter**: removes a filter previously set.
 
 ```php
 <?php
@@ -21,7 +21,7 @@ $result = $sphinxSearch->query('Spiderman','movies');
 
 // Unset the filter to stop filtering by year
 // Now we'll get all the Spiderman movies.
-$sphinxSearch->RemoveFilter('year');
+$sphinxSearch->removeFilter('year');
 $sphinxSearch->query('Spiderman','movies');
 ```
 
