@@ -3,5 +3,12 @@ php:
   - 5.5
   - 5.4
   - 5.3
+before_install:
+  - sudo apt-get -y install sphinxsearch
 before_script:
-   - composer install
+  # http://about.travis-ci.org/docs/user/database-setup/
+  - composer install
+  - mysql -e 'create database facet_sphinx;' > /dev/null
+services:
+  - redis-server
+  - memcached
