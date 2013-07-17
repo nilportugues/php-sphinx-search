@@ -114,40 +114,40 @@ define ( "SPH_GROUPBY_ATTRPAIR",	5 );
  */
 class SphinxClient
 {
-    protected $_host;			// searchd host (default is "localhost")
-    protected $_port;			// searchd port (default is 9312)
-    protected $_offset;		    // how many records to seek from result-set start (default is 0)
-    protected $_limit;		    // how many records to return from result-set starting at offset (default is 20)
-    protected $_mode;			// query matching mode (default is SPH_MATCH_ALL)
-    protected $_weights;		// per-field weights (default is 1 for all fields)
-    protected $_sort;			// match sorting mode (default is SPH_SORT_RELEVANCE)
-    protected $_sortby;		    // attribute to sort by (defualt is "")
-    protected $_min_id;		    // min ID to match (default is 0, which means no limit)
-    protected $_max_id;		    // max ID to match (default is 0, which means no limit)
-    protected $_filters;		// search filters
-    protected $_groupby;		// group-by attribute name
-    protected $_groupfunc;	    // group-by function (to pre-process group-by attribute value with)
-    protected $_groupsort;	    // group-by sorting clause (to sort groups in result set with)
+    protected $_host;           // searchd host (default is "localhost")
+    protected $_port;           // searchd port (default is 9312)
+    protected $_offset;         // how many records to seek from result-set start (default is 0)
+    protected $_limit;          // how many records to return from result-set starting at offset (default is 20)
+    protected $_mode;           // query matching mode (default is SPH_MATCH_ALL)
+    protected $_weights;        // per-field weights (default is 1 for all fields)
+    protected $_sort;           // match sorting mode (default is SPH_SORT_RELEVANCE)
+    protected $_sortby;         // attribute to sort by (defualt is "")
+    protected $_min_id;         // min ID to match (default is 0, which means no limit)
+    protected $_max_id;         // max ID to match (default is 0, which means no limit)
+    protected $_filters;        // search filters
+    protected $_groupby;        // group-by attribute name
+    protected $_groupfunc;      // group-by function (to pre-process group-by attribute value with)
+    protected $_groupsort;      // group-by sorting clause (to sort groups in result set with)
     protected $_groupdistinct;  // group-by count-distinct attribute
-    protected $_maxmatches;	    // max matches to retrieve
-    protected $_cutoff;		    // cutoff to stop searching at (default is 0)
-    protected $_retrycount;	    // distributed retries count
-    protected $_retrydelay;	    // distributed retries delay
-    protected $_anchor;		    // geographical anchor point
-    protected $_indexweights;	// per-index weights
-    protected $_ranker;		    // ranking mode (default is SPH_RANK_PROXIMITY_BM25)
-    protected $_rankexpr;		// ranking mode expression (for SPH_RANK_EXPR)
-    protected $_maxquerytime;	// max query time, milliseconds (default is 0, do not limit)
-    protected $_fieldweights;	// per-field-name weights
-    protected $_overrides;	    // per-query attribute values overrides
-    protected $_select;		    // select-list (attributes or expressions, with optional aliases)
-    protected $_error;		    // last error message
-    protected $_warning;		// last warning message
-    protected $_connerror;		// connection error vs remote error flag
-    protected $_reqs;			// requests array for multi-query
-    protected $_mbenc;		    // stored mbstring encoding
-    protected $_arrayresult;	// whether $result["matches"] should be a hash or an array
-    protected $_timeout;		// connect timeout
+    protected $_maxmatches;     // max matches to retrieve
+    protected $_cutoff;         // cutoff to stop searching at (default is 0)
+    protected $_retrycount;     // distributed retries count
+    protected $_retrydelay;     // distributed retries delay
+    protected $_anchor;         // geographical anchor point
+    protected $_indexweights;   // per-index weights
+    protected $_ranker;         // ranking mode (default is SPH_RANK_PROXIMITY_BM25)
+    protected $_rankexpr;       // ranking mode expression (for SPH_RANK_EXPR)
+    protected $_maxquerytime;   // max query time, milliseconds (default is 0, do not limit)
+    protected $_fieldweights;   // per-field-name weights
+    protected $_overrides;      // per-query attribute values overrides
+    protected $_select;         // select-list (attributes or expressions, with optional aliases)
+    protected $_error;          // last error message
+    protected $_warning;        // last warning message
+    protected $_connerror;      // connection error vs remote error flag
+    protected $_reqs;           // requests array for multi-query
+    protected $_mbenc;          // stored mbstring encoding
+    protected $_arrayresult;    // whether $result["matches"] should be a hash or an array
+    protected $_timeout;        // connect timeout
     protected $_path;
     protected $_socket;
 
@@ -157,48 +157,48 @@ class SphinxClient
     public function __construct()
     {
         // Per-client-object settings
-        $this->_host		= "localhost";
-        $this->_port		= 9312;
-        $this->_path		= false;
-        $this->_socket		= false;
+        $this->_host		    = "localhost";
+        $this->_port		    = 9312;
+        $this->_path		    = false;
+        $this->_socket		    = false;
 
         // Per-query settings
-        $this->_offset		= 0;
-        $this->_limit		= 20;
-        $this->_mode		= SPH_MATCH_ALL;
-        $this->_weights		= array ();
-        $this->_sort		= SPH_SORT_RELEVANCE;
-        $this->_sortby		= "";
-        $this->_min_id		= 0;
-        $this->_max_id		= 0;
-        $this->_filters		= array ();
-        $this->_groupby		= "";
-        $this->_groupfunc	= SPH_GROUPBY_DAY;
-        $this->_groupsort	= "@group desc";
-        $this->_groupdistinct= "";
-        $this->_maxmatches	= 1000;
-        $this->_cutoff		= 0;
-        $this->_retrycount	= 0;
-        $this->_retrydelay	= 0;
-        $this->_anchor		= array ();
-        $this->_indexweights= array ();
-        $this->_ranker		= SPH_RANK_PROXIMITY_BM25;
-        $this->_rankexpr	= "";
-        $this->_maxquerytime= 0;
-        $this->_fieldweights= array();
-        $this->_overrides 	= array();
-        $this->_select		= "*";
+        $this->_offset		    = 0;
+        $this->_limit		    = 20;
+        $this->_mode		    = SPH_MATCH_ALL;
+        $this->_weights		    = array ();
+        $this->_sort		    = SPH_SORT_RELEVANCE;
+        $this->_sortby		    = "";
+        $this->_min_id		    = 0;
+        $this->_max_id		    = 0;
+        $this->_filters		    = array ();
+        $this->_groupby		    = "";
+        $this->_groupfunc	    = SPH_GROUPBY_DAY;
+        $this->_groupsort	    = "@group desc";
+        $this->_groupdistinct   = "";
+        $this->_maxmatches	    = 1000;
+        $this->_cutoff		    = 0;
+        $this->_retrycount	    = 0;
+        $this->_retrydelay	    = 0;
+        $this->_anchor		    = array ();
+        $this->_indexweights    = array ();
+        $this->_ranker		    = SPH_RANK_PROXIMITY_BM25;
+        $this->_rankexpr	    = "";
+        $this->_maxquerytime    = 0;
+        $this->_fieldweights    = array();
+        $this->_overrides 	    = array();
+        $this->_select		    = "*";
 
         // Per-reply fields (for single-query case)
-        $this->_error		= "";
-        $this->_warning		= "";
-        $this->_connerror	= false;
+        $this->_error           = "";
+        $this->_warning         = "";
+        $this->_connerror       = false;
 
         // Requests storage (for multi-query case)
-        $this->_reqs		= array ();
-        $this->_mbenc		= "";
-        $this->_arrayresult	= false;
-        $this->_timeout		= 0;
+        $this->_reqs            = array ();
+        $this->_mbenc           = "";
+        $this->_arrayresult     = false;
+        $this->_timeout         = 0;
     }
 
     /**
