@@ -39,8 +39,8 @@ Nil Portugués Calderó
  - http://nilportugues.com
 
 ## 5. Based on the work
- * fSphinx[3], Sphinx Facet Search for Python.
- * fSphinxPHP[4], port to PHP of fSphinx[3].
+ * [fSphinx][3], Sphinx Facet Search for Python.
+ * [fSphinxPHP][4], port to PHP of [fSphinx][3].
 
 [1]: http://sphinxsearch.com
 [2]: http://sphinxsearch.com/docs/current.html
