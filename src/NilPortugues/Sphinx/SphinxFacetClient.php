@@ -1,6 +1,6 @@
 <?php
 
-namespace NilPortugues\Sphinx\Facet;
+namespace NilPortugues\Sphinx;
 
 use NilPortugues\Sphinx\SphinxClient as SphinxClient;
 
