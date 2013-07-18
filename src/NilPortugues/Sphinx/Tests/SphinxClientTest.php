@@ -11,12 +11,29 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
                 ->setServer(SPHINX_HOST,SPHINX_PORT);
     }
 
-
     public function testRemoveFilter()
     {
+        $this->sphinx->setFilter('year',array(2014));
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+        $_filters = $_filters[0];
+
+        $this->assertInternalType('array',$_filters);
+        $this->assertEquals('year',$_filters['attr']);
+        $this->assertEquals(array(2014),$_filters['values']);
+
+        $this->sphinx->removeFilter('year');
+
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters);
+        $this->assertEquals(array(),$_filters);
     }
-
 
     public function testGetLastError()
     {
@@ -145,9 +162,18 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testSetFilter()
+    public function testSetFilterWithoutExcludeFlag()
     {
+        $this->sphinx->setFilter('year',array(2014));
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('year',$_filters[0]['attr']);
+        $this->assertEquals(array(2014),$_filters[0]['values']);
     }
 
     public function testSetFilterRange()
