@@ -40,7 +40,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('',$this->sphinx->getLastError());
     }
 
-
     public function testGetLastErrorWhenConnectingToNonExistentHost()
     {
         $this->sphinx
@@ -86,7 +85,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetServerHostAndPort()
     {
-        $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
+        $this->sphinx->setServer(SPHINX_HOST,80);
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_path = $reflectionClass->getProperty('_path');
@@ -96,7 +95,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_port->setAccessible(true);
 
         $this->assertEquals( '', $_path->getValue($this->sphinx) );
-        $this->assertEquals( SPHINX_PORT, $_port->getValue($this->sphinx) );
+        $this->assertEquals( 80, $_port->getValue($this->sphinx) );
     }
 
 
@@ -146,13 +145,86 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMaxQueryTime()
     {
+        $this->sphinx->setMaxQueryTime( 10 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_maxquerytime = $reflectionClass->getProperty('_maxquerytime');
+        $_maxquerytime->setAccessible(true);
+
+        $this->assertEquals(10,$_maxquerytime->getValue($this->sphinx));
     }
 
-    public function testSetMatchMode()
+    public function testSetMatchMode_SPH_MATCH_ALL()
     {
+        $this->sphinx->setMatchMode(SPH_MATCH_ALL);
 
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_ALL,$_mode->getValue($this->sphinx));
     }
+
+    public function testSetMatchMode_SPH_MATCH_ANY()
+    {
+        $this->sphinx->setMatchMode(SPH_MATCH_ANY);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_ANY,$_mode->getValue($this->sphinx));
+    }
+
+    public function testSetMatchMode_SPH_MATCH_PHRASE()
+    {
+        $this->sphinx->setMatchMode(SPH_MATCH_PHRASE);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_PHRASE,$_mode->getValue($this->sphinx));
+    }
+
+    public function testSetMatchMode_SPH_MATCH_BOOLEAN()
+    {
+        $this->sphinx->setMatchMode(SPH_MATCH_BOOLEAN);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_BOOLEAN,$_mode->getValue($this->sphinx));
+    }
+
+    public function testSetMatchMode_SPH_MATCH_EXTENDED()
+    {
+        $this->sphinx->setMatchMode(SPH_MATCH_EXTENDED);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_EXTENDED,$_mode->getValue($this->sphinx));
+    }
+
+    public function testSetMatchMode_SPH_MATCH_FULLSCAN()
+    {
+        $this->sphinx->setMatchMode(SPH_MATCH_FULLSCAN);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_FULLSCAN,$_mode->getValue($this->sphinx));
+    }
+
+    public function testSetMatchMode_SPH_MATCH_EXTENDED2()
+    {
+        $this->sphinx->setMatchMode(SPH_MATCH_EXTENDED2);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode->setAccessible(true);
+
+        $this->assertEquals(SPH_MATCH_EXTENDED2,$_mode->getValue($this->sphinx));
+    }
+
 
     public function testSetRankingMode()
     {
@@ -196,6 +268,67 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array',$_filters[0]);
         $this->assertEquals('year',$_filters[0]['attr']);
         $this->assertEquals(array(2014),$_filters[0]['values']);
+        $this->assertFalse($_filters[0]['exclude']);
+    }
+
+    public function testSetFilterWithExcludeFlagTrue()
+    {
+        $this->sphinx->setFilter('year',array(2014),true);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('year',$_filters[0]['attr']);
+        $this->assertEquals(array(2014),$_filters[0]['values']);
+        $this->assertTrue($_filters[0]['exclude']);
+    }
+
+    public function testSetFilterWithExcludeFlagOne()
+    {
+        $this->sphinx->setFilter('year',array(2014),1);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('year',$_filters[0]['attr']);
+        $this->assertEquals(array(2014),$_filters[0]['values']);
+        $this->assertTrue($_filters[0]['exclude']);
+    }
+
+    public function testSetFilterWithExcludeFlagZero()
+    {
+        $this->sphinx->setFilter('year',array(2014),0);
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('year',$_filters[0]['attr']);
+        $this->assertEquals(array(2014),$_filters[0]['values']);
+        $this->assertFalse($_filters[0]['exclude']);
+    }
+
+    public function testSetFilterWithExcludeFlagBeingNonValidBooleanValue()
+    {
+        $this->sphinx->setFilter('year',array(2014),'ThisShouldBeConvertedToFalse');
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('year',$_filters[0]['attr']);
+        $this->assertEquals(array(2014),$_filters[0]['values']);
+        $this->assertFalse($_filters[0]['exclude']);
     }
 
     public function testSetFilterRange()

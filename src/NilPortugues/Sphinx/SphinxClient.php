@@ -489,8 +489,12 @@ class SphinxClient
         return $this;
     }
 
-    /// set maximum query time, in milliseconds, per-index
-    /// integer, 0 means "do not limit"
+    /**
+     * Set maximum query time, in milliseconds, per-index.Integer, 0 means "do not limit".
+     *
+     * @param $max
+     * @return SphinxClient
+     */
     public function setMaxQueryTime ( $max )
     {
         assert ( is_int($max) );
@@ -500,7 +504,12 @@ class SphinxClient
         return $this;
     }
 
-    /// set matching mode
+    /**
+     * Sets a matching mode.
+     *
+     * @param $mode
+     * @return SphinxClient
+     */
     public function setMatchMode ( $mode )
     {
         assert ( $mode==SPH_MATCH_ALL
@@ -619,6 +628,8 @@ class SphinxClient
         assert ( is_array($values) );
         assert ( count($values) );
 
+        $exclude = $this->convertToBoolean($exclude);
+
         if ( is_array($values) && count($values) ) {
             foreach ( $values as $value )
                 assert ( is_numeric($value) );
@@ -638,6 +649,8 @@ class SphinxClient
         assert ( is_numeric($max) );
         assert ( $min<=$max );
 
+        $exclude = $this->convertToBoolean($exclude);
+
         $this->_filters[] = array ( "type"=>SPH_FILTER_RANGE, "attr"=>$attribute, "exclude"=>$exclude, "min"=>$min, "max"=>$max );
 
         return $this;
@@ -652,12 +665,14 @@ class SphinxClient
      * @param  bool         $exclude
      * @return SphinxClient
      */
-    public function setFilterFloatRange ( $attribute, $min, $max, $exclude=false )
+    public function setFilterFloatRange ( $attribute, $min, $max, $exclude = false )
     {
         assert ( is_string($attribute) );
         assert ( is_float($min) );
         assert ( is_float($max) );
         assert ( $min<=$max );
+
+        $exclude = $this->convertToBoolean($exclude);
 
         $this->_filters[] = array ( "type"=>SPH_FILTER_FLOATRANGE, "attr"=>$attribute, "exclude"=>$exclude, "min"=>$min, "max"=>$max );
 
@@ -1894,5 +1909,28 @@ class SphinxClient
         }
 
         return $this;
+    }
+
+
+    protected function convertToBoolean($exclude)
+    {
+        if( is_int($exclude) && ($exclude < 2 && $exclude > -1) )
+        {
+            settype($exclude,'boolean');
+        }
+        elseif(
+            $exclude === true
+            || $exclude === false
+            || strtolower($exclude) == 'true'
+            || strtolower($exclude) == 'false'
+        )
+        {
+            settype($exclude,'boolean');
+        }
+        else
+        {
+            $exclude = false;
+        }
+        return $exclude;
     }
 }
