@@ -225,27 +225,169 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(SPH_MATCH_EXTENDED2,$_mode->getValue($this->sphinx));
     }
 
-    public function testSetRankingMode()
+    public function testSetRankingMode_SPH_RANK_EXPR()
     {
+        $this->sphinx->setRankingMode( SPH_RANK_EXPR );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_EXPR,$_ranker->getValue($this->sphinx));
 
     }
 
-    public function testSetSortMode()
+    public function testSetRankingMode_SPH_RANK_FIELDMASK()
     {
+        $this->sphinx->setRankingMode( SPH_RANK_FIELDMASK );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_FIELDMASK,$_ranker->getValue($this->sphinx));
+
+    }
+
+    public function testSetRankingMode_SPH_RANK_MATCHANY()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_MATCHANY );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_MATCHANY,$_ranker->getValue($this->sphinx));
+
+    }
+
+    public function testSetRankingMode_SPH_RANK_WORDCOUNT()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_WORDCOUNT );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_WORDCOUNT,$_ranker->getValue($this->sphinx));
+
+    }
+
+    public function testSetRankingMode_SPH_RANK_PROXIMITY()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_PROXIMITY );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_PROXIMITY,$_ranker->getValue($this->sphinx));
+
+    }
+
+    public function testSetRankingMode_SPH_RANK_PROXIMITY_BM25()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_PROXIMITY_BM25 );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_PROXIMITY_BM25,$_ranker->getValue($this->sphinx));
+
+    }
+
+
+    public function testSetRankingMode_SPH_RANK_BM25()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_BM25 );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_BM25,$_ranker->getValue($this->sphinx));
+
+    }
+
+    public function testSetRankingMode_SPH_RANK_NONE()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_NONE );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_NONE,$_ranker->getValue($this->sphinx));
+
+    }
+
+    public function testSetRankingMode_SPH_RANK_SPH04()
+    {
+        $this->sphinx->setRankingMode( SPH_RANK_SPH04, "Some valid rank expression" );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker->setAccessible(true);
+        $this->assertEquals(SPH_RANK_SPH04,$_ranker->getValue($this->sphinx));
+
+        $_rankexpr = $reflectionClass->getProperty('_rankexpr');
+        $_rankexpr->setAccessible(true);
+        $this->assertEquals("Some valid rank expression",$_rankexpr->getValue($this->sphinx));
 
     }
 
     public function testSetWeights()
     {
+        $this->setExpectedException('\Exception');
+        $weights = array
+        (
+            'index_attribute1' => 10,
+            'index_attribute2' => 100,
+        );
 
+        $this->sphinx->setWeights($weights);
     }
 
     public function testSetFieldWeights()
     {
+        $weights = array
+        (
+            'index_attribute1' => 10,
+            'index_attribute2' => 100,
+        );
+        $this->sphinx->SetFieldWeights($weights);
 
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_fieldweights = $reflectionClass->getProperty('_fieldweights');
+        $_fieldweights->setAccessible(true);
+
+        $this->assertEquals($weights,$_fieldweights->getValue($this->sphinx));
     }
 
     public function testSetIndexWeights()
+    {
+        $weights = array
+        (
+            'fulltext_attribute1' => 10,
+            'fulltext_attribute2' => 100,
+        );
+        $this->sphinx->SetIndexWeights($weights);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_indexweights = $reflectionClass->getProperty('_indexweights');
+        $_indexweights->setAccessible(true);
+
+        $this->assertEquals($weights,$_indexweights->getValue($this->sphinx));
+    }
+
+
+
+
+
+
+    public function testSetSortMode()
     {
 
     }
@@ -254,6 +396,13 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     {
 
     }
+
+
+
+
+
+
+
 
     public function testSetFilterWithoutExcludeFlag()
     {
@@ -329,6 +478,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(2014),$_filters[0]['values']);
         $this->assertFalse($_filters[0]['exclude']);
     }
+
+
+
+
 
     public function testSetFilterRange()
     {

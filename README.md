@@ -47,3 +47,6 @@ $result = $sphinxSearch
 Nil Portugués Calderó
  - <contact@nilportugues.com>
  - http://nilportugues.com
+
+ [1] : http://sphinxsearch.com/
+ [2] : http://sphinxsearch.com/docs/current.html

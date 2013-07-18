@@ -555,14 +555,16 @@ class SphinxClient
     }
 
     /**
-     * DEPRECATED; Alias to SetFieldWeights().
+     * DEPRECATED; Throws exception. Use SetFieldWeights() instead.
      *
-     * @param  array        $weights
-     * @return SphinxClient
+     * @param array $weights
+     * @throws \Exception
      */
     public function setWeights ( array $weights )
     {
-        return $this->setFieldWeights ( $weights );
+        unset($weights);
+        throw new \Exception("setWeights method is deprecated. Use SetFieldWeights() instead.");
+
     }
 
     /**
