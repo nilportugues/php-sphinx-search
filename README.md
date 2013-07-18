@@ -29,7 +29,7 @@ $result = $sphinxSearch->query('Spiderman','movies');
 $sphinxSearch->removeFilter('year');
 $result = $sphinxSearch->query('Spiderman','movies');
 ```
-* Chainable methods
+### Chainable methods
 While updating the code, chaining capability has been added. SphinxClient's setters can be chained resulting in a cleaner code.
 ```
 $sphinxSearch = new \NilPortugues\Sphinx\SphinxClient();
