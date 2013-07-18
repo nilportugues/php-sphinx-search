@@ -41,7 +41,9 @@ $result = $sphinxSearch
                 ->query('Spiderman','movies')
         ;
 ```
-## 4. Author
+
+
+## 5. Author
 Nil Portugués Calderó
  - <contact@nilportugues.com>
  - http://nilportugues.com

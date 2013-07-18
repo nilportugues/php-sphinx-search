@@ -7,6 +7,8 @@ before_script:
   # http://about.travis-ci.org/docs/user/database-setup/
   - composer install
   - sudo apt-get -y install sphinxsearch
+  - sudo chmod 777 /usr/bin/searchd
+  - sudo chmod 777 /usr/bin/indexer
   - mysql -e 'create database facet_sphinx;' > /dev/null
 services:
   - redis-server

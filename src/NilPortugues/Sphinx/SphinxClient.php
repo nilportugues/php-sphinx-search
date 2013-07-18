@@ -545,21 +545,24 @@ class SphinxClient
         return $this;
     }
 
-    /// bind per-field weights by order
-    /// DEPRECATED; use SetFieldWeights() instead
-    public function setWeights ( $weights )
+    /**
+     * DEPRECATED; Alias to SetFieldWeights().
+     *
+     * @param array $weights
+     * @return SphinxClient
+     */
+    public function setWeights ( array $weights )
     {
-        assert ( is_array($weights) );
-        foreach ( $weights as $weight )
-            assert ( is_int($weight) );
-
-        $this->_weights = $weights;
-
-        return $this;
+        return $this->setFieldWeights ( $weights );
     }
 
-    /// bind per-field weights by name
-    public function setFieldWeights ( $weights )
+    /**
+     * Bind per-field weights by name.
+     *
+     * @param $weights
+     * @return SphinxClient
+     */
+    public function setFieldWeights (array $weights )
     {
         assert ( is_array($weights) );
         foreach ($weights as $name=>$weight) {
@@ -571,8 +574,13 @@ class SphinxClient
         return $this;
     }
 
-    /// bind per-index weights by name
-    public function setIndexWeights ( $weights )
+    /**
+     * Bind per-index weights by name
+     *
+     * @param array $weights
+     * @return SphinxClient
+     */
+    public function setIndexWeights ( array $weights )
     {
         assert ( is_array($weights) );
         foreach ($weights as $index=>$weight) {
@@ -597,9 +605,15 @@ class SphinxClient
         return $this;
     }
 
-    /// set values set filter
-    /// only match records where $attribute value is in given set
-    public function setFilter ( $attribute, $values, $exclude=false )
+    /**
+     * Set values for a set filter. Only matches records where $attribute value is in given set.
+     *
+     * @param $attribute
+     * @param array $values
+     * @param bool $exclude
+     * @return SphinxClient
+     */
+    public function setFilter ( $attribute, array $values, $exclude=false )
     {
         assert ( is_string($attribute) );
         assert ( is_array($values) );
