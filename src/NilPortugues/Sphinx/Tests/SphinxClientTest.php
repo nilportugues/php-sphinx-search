@@ -43,8 +43,16 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testGetLastErrorWhenConnectingToNonExistentHost()
     {
-        $this->sphinx->setServer('2013.192.168.0.1');
-        $this->assertEquals('',$this->sphinx->getLastError());
+        $this->sphinx
+            ->setServer('2013.192.168.0.1')
+            ->query('test')
+        ;
+
+        $this->assertEquals
+        (
+            'connection to 2013.192.168.0.1:9312 failed (errno=0, msg=php_network_getaddresses: getaddrinfo failed: Name or service not known)',
+            $this->sphinx->getLastError()
+        );
     }
 
 
@@ -263,15 +271,24 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testStatusWhenOK()
-    {
-        $actual = $this->sphinx->status();
-        $this->assertInternalType('array',$actual);
-    }
 
     public function testCloseWhenConnectionNotEstablished()
     {
+        $actual = $this->sphinx->status();
+        $this->assertInternalType('boolean',$actual);
+        $this->asserFalse($actual);
+    }
 
+    public function testCloseWhenConnectionEstablishedWithWrongData()
+    {
+        $this->sphinx
+            ->setServer('2013.192.168.0.1')
+            ->query('test')
+        ;
+
+        $actual = $this->sphinx->status();
+        $this->assertInternalType('boolean',$actual);
+        $this->assertFalse($actual);
     }
 
     public function testCloseWhenConnectionEstablished()
