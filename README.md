@@ -1,4 +1,4 @@
-# Sphinx and Sphinx Facet Search
+# Sphinx and Sphinx Facet Search [![Build Status](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx.png?branch=master)](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx)
 
 ## 1. Sphinx for PHP 5.3 or above
 This class is a port of the original Sphinx API class by **Andrew Aksyonoff** and [Sphinx Technologies Inc][1] to PHP 5.3 and above.
