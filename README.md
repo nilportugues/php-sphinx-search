@@ -28,10 +28,20 @@ $sphinxSearch->query('Spiderman','movies');
 ## 2. Sphinx with Facet Search
 
 ### What is a faceted search?
-Think of "filtering", "refining" or "drilling down". For example, when searching through a database of movie titles, you could get a list of clickable refinement options such as actors, directors, genre and year of release. Unlike static hierarchical navigation, facets are calculated as you search so you always get options that are relevant to your current query terms.
+Faceted search, also called faceted navigation or faceted browsing, is a technique for accessing information organized according to a faceted classification system, allowing users to explore a collection of information by applying multiple filters.
+
+A faceted classification system classifies each information element along multiple explicit dimensions, enabling the classifications to be accessed and ordered in multiple ways rather than in a single, pre-determined, taxonomic order.
+
+### What is a facet?
+Facets correspond to properties of the information elements. They are often derived by analysis of the text of an item using entity extraction techniques or from pre-existing fields in a database such as author, descriptor, language, and format. Thus, existing web-pages, product descriptions or online collections of articles can be augmented with navigational facets.
+
+*Source: [Wikipedia][http://en.wikipedia.org/wiki/Faceted_search]*
 
 
 ## 3. Todo
+* Implement Facet
+* Implement SphinxFacetClient
+* Implement cache techniques.
 
 ## 4. Author
 Nil Portugués Calderó
