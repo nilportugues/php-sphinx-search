@@ -4,7 +4,7 @@
 This class is a port of the original Sphinx API class by **Andrew Aksyonoff** and [Sphinx Technologies Inc][1] to PHP 5.3 and above.
 
 ### New methods for SphinxClient
-While all the existing methods available and vastly documented in the [Sphinx Documentation][2], this version of the SphinxClient for PHP includes a new method.
+While all the existing methods are available and vastly documented in the [Sphinx Documentation][2], this version of the SphinxClient for PHP includes a new method.
 
 * **removeFilter**: removes a filter previously set.
 
@@ -25,7 +25,7 @@ $sphinxSearch->removeFilter('year');
 $sphinxSearch->query('Spiderman','movies');
 ```
 
-## 2. Facet Search
+## 2. Facets and Faceted Search
 
 ### What is a facet?
 Facets correspond to properties of the information elements. They are often derived by analysis of the text of an item using entity extraction techniques or from pre-existing fields in a database such as author, descriptor, language, and format. Thus, existing web-pages, product descriptions or online collections of articles can be augmented with navigational facets.
