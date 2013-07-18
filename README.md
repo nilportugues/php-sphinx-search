@@ -27,8 +27,20 @@ $result = $sphinxSearch->query('Spiderman','movies');
 // Unset the filter to stop filtering by year
 // Now we'll get all the Spiderman movies.
 $sphinxSearch->removeFilter('year');
-$sphinxSearch->query('Spiderman','movies');
+$result = $sphinxSearch->query('Spiderman','movies');
 ```
+* Chainable methods
+While updating the code, chaining capability has been added. SphinxClient's setters can be chained resulting in a cleaner code.
+```
+$sphinxSearch = new \NilPortugues\Sphinx\SphinxClient();
+
+$result = $sphinxSearch
+                ->setFilter('year',array(2014))
+                ->query('Spiderman','movies')
+        ;
+
+```
+
 
 ## 3. Facets and Faceted Search
 
