@@ -123,7 +123,25 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetLimits()
     {
+        $this->sphinx->setLimits( 10, 100, 1000, 500 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_offset = $reflectionClass->getProperty('_offset');
+        $_offset->setAccessible(true);
+
+        $_limit = $reflectionClass->getProperty('_limit');
+        $_limit->setAccessible(true);
+
+        $_maxmatches = $reflectionClass->getProperty('_maxmatches');
+        $_maxmatches->setAccessible(true);
+
+        $_cutoff = $reflectionClass->getProperty('_cutoff');
+        $_cutoff->setAccessible(true);
+
+        $this->assertEquals(10,$_offset->getValue($this->sphinx));
+        $this->assertEquals(100,$_limit->getValue($this->sphinx));
+        $this->assertEquals(1000,$_maxmatches->getValue($this->sphinx));
+        $this->assertEquals(500,$_cutoff->getValue($this->sphinx));
     }
 
     public function testSetMaxQueryTime()
@@ -271,14 +289,14 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-
+/*
     public function testCloseWhenConnectionNotEstablished()
     {
         $actual = $this->sphinx->status();
         $this->assertInternalType('boolean',$actual);
-        $this->asserFalse($actual);
+        $this->assertFalse($actual);
     }
-
+*/
     public function testCloseWhenConnectionEstablishedWithWrongData()
     {
         $this->sphinx
@@ -296,8 +314,17 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testFlushAttributes()
+    public function testFlushAttributesOK()
     {
+        //$this->assertEquals("",$this->sphinx->getLastError());
+    }
 
+    public function testFlushAttributesKO()
+    {
+      /*  $actual = $this->sphinx->flushAttributes();
+
+        $this->assertEquals(-1,$actual);
+        $this->assertEquals("unexpected response length",$this->sphinx->getLastError());
+      */
     }
 }
