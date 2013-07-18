@@ -557,7 +557,7 @@ class SphinxClient
     /**
      * DEPRECATED; Alias to SetFieldWeights().
      *
-     * @param array $weights
+     * @param  array        $weights
      * @return SphinxClient
      */
     public function setWeights ( array $weights )
@@ -584,9 +584,9 @@ class SphinxClient
     }
 
     /**
-     * Bind per-index weights by name
+     * Bind per-index weights by name.
      *
-     * @param array $weights
+     * @param  array        $weights
      * @return SphinxClient
      */
     public function setIndexWeights ( array $weights )
@@ -601,8 +601,13 @@ class SphinxClient
         return $this;
     }
 
-    /// set IDs range to match
-    /// only match records if document ID is beetwen $min and $max (inclusive)
+    /**
+     * Set IDs range to match. Only match records if document ID is between $min and $max (inclusive)
+     *
+     * @param $min
+     * @param $max
+     * @return SphinxClient
+     */
     public function setIDRange ( $min, $max )
     {
         assert ( is_numeric($min) );
@@ -618,8 +623,8 @@ class SphinxClient
      * Set values for a set filter. Only matches records where $attribute value is in given set.
      *
      * @param $attribute
-     * @param array $values
-     * @param bool $exclude
+     * @param  array        $values
+     * @param  bool         $exclude
      * @return SphinxClient
      */
     public function setFilter ( $attribute, array $values, $exclude=false )
@@ -1414,7 +1419,7 @@ class SphinxClient
      * Escapes a string.
      *
      * @param $string
-     * @return mixed
+     * @return string
      */
     public function escapeString ( $string )
     {
@@ -1892,7 +1897,7 @@ class SphinxClient
 
     /**
      * Removes a previously set filter.
-     * @author: Nil Portugués
+     * @author: Nil Portugués Calderó
      *
      * @param $attribute
      * @return SphinxClient
@@ -1911,26 +1916,29 @@ class SphinxClient
         return $this;
     }
 
-
+    /**
+     * @author: Nil Portugués Calderó
+     * Converts values to its boolean representation.
+     *
+     * @param $exclude
+     * @return bool
+     */
     protected function convertToBoolean($exclude)
     {
-        if( is_int($exclude) && ($exclude < 2 && $exclude > -1) )
-        {
+        if ( is_numeric($exclude) && ($exclude == 0 || $exclude == 1) ) {
             settype($exclude,'boolean');
-        }
-        elseif(
+        } elseif(
             $exclude === true
             || $exclude === false
-            || strtolower($exclude) == 'true'
-            || strtolower($exclude) == 'false'
+            || strtolower(trim($exclude)) === 'true'
+            || strtolower(trim($exclude)) === 'false'
         )
         {
             settype($exclude,'boolean');
-        }
-        else
-        {
+        } else {
             $exclude = false;
         }
+
         return $exclude;
     }
 }

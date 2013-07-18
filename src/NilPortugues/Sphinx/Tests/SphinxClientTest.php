@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Testing the SphinxClient class.
+ * This does not test the search results returned by searchd.
+ */
 class SphinxClientTest extends \PHPUnit_Framework_TestCase
 {
     protected $sphinx;
@@ -54,12 +58,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-
     public function testGetLastErrorWhenConnectionNotEstablished()
     {
 
     }
-
 
     public function testGetLastWarning()
     {
@@ -98,7 +100,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals( 80, $_port->getValue($this->sphinx) );
     }
 
-
     public function testSetServerHostOnly()
     {
         $this->sphinx->setServer(SPHINX_HOST);
@@ -113,7 +114,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals( '', $_path->getValue($this->sphinx) );
         $this->assertEquals( 9312, $_port->getValue($this->sphinx) );
     }
-
 
     public function testSetConnectTimeout()
     {
@@ -224,7 +224,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(SPH_MATCH_EXTENDED2,$_mode->getValue($this->sphinx));
     }
-
 
     public function testSetRankingMode()
     {
