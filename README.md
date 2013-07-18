@@ -1,23 +1,25 @@
-# Sphinx and Sphinx Faceted Search [![Build Status](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx.png?branch=master)](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx)
+# Sphinx for PHP 5.3 and above [![Build Status](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx.png?branch=master)](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx)
+
+This class is a port of the original Sphinx API class by **Andrew Aksyonoff** and [Sphinx Technologies Inc][1] to PHP 5.3 and above.
 
 ## 1. Requirements
 * Composer
-* PHP 5.3+ (namespaces, anonymous functions)
-* Sphinx 1.10+ (string attributes)
+* PHP 5.3 or above
+* SphinxSearch
 
-## 2. Sphinx for PHP 5.3 or above
-This class is a port of the original Sphinx API class by **Andrew Aksyonoff** and [Sphinx Technologies Inc][1] to PHP 5.3 and above.
-
-### New methods for SphinxClient
+## 2. Added removeFilter
 While all the existing methods are available and vastly documented in the [Sphinx Documentation][2], this version of the SphinxClient for PHP includes a new method.
 
-* **removeFilter**: removes a filter previously set.
+* **removeFilter**: The original SphinxClient allows you to clear all filters. This method removes a specific filter previously set.
 
 ```php
 <?php
 
 $sphinxSearch = new \NilPortugues\Sphinx\SphinxClient();
-//Do connection ...
+
+//Do connection and set up search method...
+$sphinxSearch->setServer('127.0.0.1',9312);
+
 
 // Do search...
 // Result would contain "The Amazing Spider-Man 2", to be in theatres in 2014.
@@ -29,7 +31,7 @@ $result = $sphinxSearch->query('Spiderman','movies');
 $sphinxSearch->removeFilter('year');
 $result = $sphinxSearch->query('Spiderman','movies');
 ```
-### Chainable methods
+## 3. Added chainable methods
 While updating the code, chaining capability has been added. SphinxClient's setters can be chained resulting in a cleaner code.
 ```php
 $sphinxSearch = new \NilPortugues\Sphinx\SphinxClient();
@@ -39,38 +41,7 @@ $result = $sphinxSearch
                 ->query('Spiderman','movies')
         ;
 ```
-
-
-## 3. Facets and Faceted Search
-
-### What is a facet?
-Facets correspond to properties of the information elements. They are often derived by analysis of the text of an item using entity extraction techniques or from pre-existing fields in a database such as author, descriptor, language, and format. Thus, existing web-pages, product descriptions or online collections of articles can be augmented with navigational facets.
-
-### What is a faceted search?
-Faceted search, also called faceted navigation or faceted browsing, is a technique for accessing information organized according to a faceted classification system, allowing users to explore a collection of information by applying multiple filters.
-
-A faceted classification system classifies each information element along multiple explicit dimensions, enabling the classifications to be accessed and ordered in multiple ways rather than in a single, pre-determined, taxonomic order.
-
-**Source:** http://en.wikipedia.org/wiki/Faceted_search
-
-## 4. Sphinx meets Faceted Search
-
-
-## 5. Todo
-* Implement Facet class.
-* Implement SphinxFacetClient class.
-* Implement cache techniques.
-
-## 6. Author
+## 4. Author
 Nil Portugués Calderó
  - <contact@nilportugues.com>
  - http://nilportugues.com
-
-## 7. Based off the excellent:
- * [fSphinx][3], Sphinx Facet Search for Python.
- * [fSphinxPHP][4], port to PHP of [fSphinx][3].
-
-[1]: http://sphinxsearch.com
-[2]: http://sphinxsearch.com/docs/current.html
-[3]: https://github.com/alexksikes/fSphinx
-[4]: https://github.com/gigablah/fsphinxphp
