@@ -43,8 +43,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testGetLastErrorWhenConnectingToNonExistentHost()
     {
-        $this->sphinx->setServer('NotAValidServerIp');
-
+        $this->sphinx->setServer('2013.192.168.0.1');
         $this->assertEquals('',$this->sphinx->getLastError());
     }
 
@@ -60,6 +59,13 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testIsConnectErrorNoConnectionInitialized()
+    {
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+        $actual = $this->sphinx->isConnectError();
+        $this->assertFalse($actual);
+    }
+
     public function testIsConnectErrorWhenConnectionInitializedWithWrongData()
     {
         $this->sphinx
@@ -68,16 +74,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         ;
         $actual = $this->sphinx->isConnectError();
         $this->assertTrue($actual);
-    }
-
-    public function testIsConnectErrorNoConnectionInitialized()
-    {
-        $this->sphinx
-            ->setServer(SPHINX_HOST,SPHINX_PORT)
-            ->query('test')
-        ;
-        $actual = $this->sphinx->isConnectError();
-        $this->assertFalse($actual);
     }
 
     public function testSetServerHostAndPort()
@@ -275,10 +271,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testCloseWhenConnectionNotEstablished()
     {
-        $actual = $this->sphinx->close();
-        $this->assertInternalType('boolean',$actual);
-        $this->assertFalse($actual);
-        $this->assertEquals('not connected',$this->sphinx->getLastError());
+
     }
 
     public function testCloseWhenConnectionEstablished()
