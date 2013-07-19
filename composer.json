@@ -1,8 +1,8 @@
 {
     "name":"nilportugues/sphinx-search",
-    "description":"",
+    "description":"SphinxSearch (SphinxAPI) for PHP5.3 and above. Fully Unit Tested. ",
     "type":"library",
-    "keywords":[ "search", "sphinx", "sphinx search", "search engine" ],
+    "keywords":[ "search", "sphinx", "sphinxapi", "sphinx search", "search engine" ],
     "homepage":"https://github.com/nilopc/NilPortugues_PHP_Sphinx",
     "license":"MIT",
     "authors":[
@@ -11,6 +11,11 @@
             "email":"contact@nilportugues.com",
             "homepage":"http://nilportugues.com",
             "role":"Lead Developer"
+        },
+        {
+            "name":"Andrew Aksyonoff",
+            "homepage": "http://sphinxsearch.com",
+            "role":"Original Author"
         }
     ],
     "require":{
