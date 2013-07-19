@@ -10,5 +10,5 @@ before_script:
   - sudo chmod 777 /usr/bin/searchd
   - sudo chmod 777 /usr/bin/indexer
   - mysql -e 'create database testDB;' > /dev/null
-  - mysql -u testDB < config/movies.sql
+  - mysql -utravis testDB < config/movies.sql
   - indexer --config config/sphinx.conf --rotate --all
