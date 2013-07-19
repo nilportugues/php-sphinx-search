@@ -1301,11 +1301,29 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testBuildExcerptsError()
+    public function testBuildExcerptsErrorDocsIsNotArray()
     {
-
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->buildExcerpts ( NULL, 'index', 'some keywords', array() );
     }
 
+    public function testBuildExcerptsErrorIndexIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->buildExcerpts ( array(), NULL, 'some keywords', array() );
+    }
+
+    public function testBuildExcerptsErrorWordsIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->buildExcerpts ( array(), 'index', NULL, array() );
+    }
+
+    public function testBuildExcerptsErrorOptionsIsNotArray()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->buildExcerpts ( array(), 'index', 'some keywords', NULL);
+    }
 
     public function testBuildExcerptsFailsOnSearchd()
     {
@@ -1321,12 +1339,25 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(false,$actual);
     }
 
+    /**
+     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     */
     public function testBuildExcerpts()
     {
+        /*
+            $docs = array(1,2,3);
+            $index = 'movies';
+            $words = 'The Amazing Spiderman';
 
+            $actual = $this->sphinx->buildExcerpts( $docs, $index, $words );
+
+            $this->assertInternalType('array',$actual);
+        */
     }
 
-
+    /**
+     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     */
     public function testBuildKeywords()
     {
 
@@ -1343,14 +1374,14 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-/*
+    /**
+     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     */
     public function testCloseWhenConnectionNotEstablished()
     {
         $actual = $this->sphinx->status();
-        $this->assertInternalType('boolean',$actual);
-        $this->assertFalse($actual);
     }
-*/
+
     public function testCloseWhenConnectionEstablishedWithWrongData()
     {
         $this->sphinx
