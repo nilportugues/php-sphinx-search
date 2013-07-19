@@ -7,9 +7,12 @@
 class SphinxClientTest extends \PHPUnit_Framework_TestCase
 {
     protected $sphinx;
+    protected $instanceName;
 
     public function setUp()
     {
+            $this->instanceName = '\NilPortugues\Sphinx\SphinxClient';
+
             $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
             $this->sphinx
                 ->setServer(SPHINX_HOST,SPHINX_PORT);
@@ -29,7 +32,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('year',$_filters['attr']);
         $this->assertEquals(array(2014),$_filters['values']);
 
-        $this->sphinx->removeFilter('year');
+        $instance = $this->sphinx->removeFilter('year');
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $_filters = $reflectionClass->getProperty('_filters');
         $_filters->setAccessible(true);
@@ -87,7 +92,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetServerHostAndPort()
     {
-        $this->sphinx->setServer(SPHINX_HOST,80);
+        $instance = $this->sphinx->setServer(SPHINX_HOST,80);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_path = $reflectionClass->getProperty('_path');
@@ -102,7 +109,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetServerHostOnly()
     {
-        $this->sphinx->setServer(SPHINX_HOST);
+        $instance = $this->sphinx->setServer(SPHINX_HOST);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_path = $reflectionClass->getProperty('_path');
@@ -117,7 +126,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetConnectTimeout()
     {
-        $this->sphinx->setConnectTimeout( 10 );
+        $instance = $this->sphinx->setConnectTimeout( 10 );
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_timeout = $reflectionClass->getProperty('_timeout');
@@ -133,7 +144,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetLimits()
     {
-        $this->sphinx->setLimits( 10, 100, 1000, 500 );
+        $instance = $this->sphinx->setLimits( 10, 100, 1000, 500 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_offset = $reflectionClass->getProperty('_offset');
@@ -181,7 +195,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMaxQueryTime()
     {
-        $this->sphinx->setMaxQueryTime( 10 );
+        $instance = $this->sphinx->setMaxQueryTime( 10 );
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_maxquerytime = $reflectionClass->getProperty('_maxquerytime');
@@ -210,7 +226,8 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_ALL()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_ALL);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_ALL);
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
@@ -221,7 +238,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_ANY()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_ANY);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_ANY);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
         $_mode->setAccessible(true);
@@ -231,7 +250,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_PHRASE()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_PHRASE);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_PHRASE);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
         $_mode->setAccessible(true);
@@ -241,7 +262,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_BOOLEAN()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_BOOLEAN);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_BOOLEAN);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
         $_mode->setAccessible(true);
@@ -251,7 +274,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_EXTENDED()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_EXTENDED);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_EXTENDED);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
         $_mode->setAccessible(true);
@@ -261,7 +286,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_FULLSCAN()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_FULLSCAN);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_FULLSCAN);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
         $_mode->setAccessible(true);
@@ -271,7 +298,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetMatchMode_SPH_MATCH_EXTENDED2()
     {
-        $this->sphinx->setMatchMode(SPH_MATCH_EXTENDED2);
+        $instance = $this->sphinx->setMatchMode(SPH_MATCH_EXTENDED2);
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_mode = $reflectionClass->getProperty('_mode');
         $_mode->setAccessible(true);
@@ -281,7 +310,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_EXPR()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_EXPR );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_EXPR );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -293,7 +324,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_FIELDMASK()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_FIELDMASK );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_FIELDMASK );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -305,7 +338,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_MATCHANY()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_MATCHANY );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_MATCHANY );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -317,7 +352,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_WORDCOUNT()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_WORDCOUNT );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_WORDCOUNT );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -329,7 +366,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_PROXIMITY()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_PROXIMITY );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_PROXIMITY );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -341,7 +380,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_PROXIMITY_BM25()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_PROXIMITY_BM25 );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_PROXIMITY_BM25 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -354,7 +395,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_BM25()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_BM25 );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_BM25 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -366,7 +409,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_NONE()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_NONE );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_NONE );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -378,8 +423,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRankingMode_SPH_RANK_SPH04()
     {
-        $this->sphinx->setRankingMode( SPH_RANK_SPH04, "Some valid rank expression" );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_SPH04, "Some valid rank expression" );
 
+        $this->assertInstanceOf($this->instanceName,$instance);
+        
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_ranker = $reflectionClass->getProperty('_ranker');
@@ -395,13 +442,13 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     public function testSetRankingModeErrorValueIsNotValid()
     {
         $this->setExpectedException('\PHPUnit_Framework_Error');
-        $this->sphinx->setRankingMode( 100000000 );
+        $instance = $this->sphinx->setRankingMode( 100000000 );
     }
 
     public function testSetRankingModeErrorAttributeIsNotString()
     {
         $this->setExpectedException('\PHPUnit_Framework_Error');
-        $this->sphinx->setRankingMode( SPH_RANK_SPH04, NULL );
+        $instance = $this->sphinx->setRankingMode( SPH_RANK_SPH04, NULL );
     }
 
     public function testSetWeights()
@@ -423,7 +470,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             'index_attribute1' => 10,
             'index_attribute2' => 100,
         );
-        $this->sphinx->SetFieldWeights($weights);
+        $instance = $this->sphinx->SetFieldWeights($weights);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_fieldweights = $reflectionClass->getProperty('_fieldweights');
@@ -439,8 +488,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             'fulltext_attribute1' => 10,
             'fulltext_attribute2' => 100,
         );
-        $this->sphinx->SetIndexWeights($weights);
+        $instance = $this->sphinx->SetIndexWeights($weights);
 
+        $this->assertInstanceOf($this->instanceName,$instance);
+        
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_indexweights = $reflectionClass->getProperty('_indexweights');
         $_indexweights->setAccessible(true);
@@ -462,7 +513,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortModeErrorModeIsTextStringDefaultsTo_SPH_SORT_RELEVANCE()
     {
-        $this->sphinx->setSortMode( "SPH_SORT_ATTR_DESC" );
+        $instance = $this->sphinx->setSortMode( "SPH_SORT_ATTR_DESC" );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -477,7 +530,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortMode_SPH_SORT_RELEVANCE()
     {
-        $this->sphinx->setSortMode( SPH_SORT_RELEVANCE );
+        $instance = $this->sphinx->setSortMode( SPH_SORT_RELEVANCE );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -491,7 +546,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortMode_SPH_SORT_EXPR()
     {
-        $this->sphinx->setSortMode(SPH_SORT_EXPR, "@weight + fulltext_field*200");
+        $instance = $this->sphinx->setSortMode(SPH_SORT_EXPR, "@weight + fulltext_field*200");
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -505,7 +562,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortMode_SPH_SORT_ATTR_DESC()
     {
-        $this->sphinx->setSortMode(SPH_SORT_ATTR_DESC,'year');
+        $instance = $this->sphinx->setSortMode(SPH_SORT_ATTR_DESC,'year');
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -519,7 +578,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortMode_SPH_SORT_ATTR_ASC()
     {
-        $this->sphinx->setSortMode(SPH_SORT_ATTR_ASC,'year');
+        $instance = $this->sphinx->setSortMode(SPH_SORT_ATTR_ASC,'year');
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -533,7 +594,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortMode_SPH_SORT_TIME_SEGMENTS()
     {
-        $this->sphinx->setSortMode(SPH_SORT_TIME_SEGMENTS,'year');
+        $instance = $this->sphinx->setSortMode(SPH_SORT_TIME_SEGMENTS,'year');
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -547,7 +610,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSortMode_SPH_SORT_EXTENDED()
     {
-        $this->sphinx->setSortMode(SPH_SORT_EXTENDED,'@relevance DESC, year DESC, @id DESC');
+        $instance = $this->sphinx->setSortMode(SPH_SORT_EXTENDED,'@relevance DESC, year DESC, @id DESC');
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
@@ -579,7 +644,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetIDRange()
     {
-        $this->sphinx->setIDRange( 100, 200 );
+        $instance = $this->sphinx->setIDRange( 100, 200 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_min_id = $reflectionClass->getProperty('_min_id');
@@ -596,7 +664,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterWithoutExcludeFlag()
     {
-        $this->sphinx->setFilter('year',array(2014));
+        $instance = $this->sphinx->setFilter('year',array(2014));
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -611,7 +682,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterWithExcludeFlagTrue()
     {
-        $this->sphinx->setFilter('year',array(2014),true);
+        $instance = $this->sphinx->setFilter('year',array(2014),true);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -626,7 +700,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterWithExcludeFlagOne()
     {
-        $this->sphinx->setFilter('year',array(2014),1);
+        $instance = $this->sphinx->setFilter('year',array(2014),1);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -641,7 +718,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterWithExcludeFlagZero()
     {
-        $this->sphinx->setFilter('year',array(2014),0);
+        $instance = $this->sphinx->setFilter('year',array(2014),0);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -656,7 +736,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterWithExcludeFlagBeingNonValidBooleanValue()
     {
-        $this->sphinx->setFilter('year',array(2014),'ThisShouldBeConvertedToFalse');
+        $instance = $this->sphinx->setFilter('year',array(2014),'ThisShouldBeConvertedToFalse');
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -695,7 +778,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterRange()
     {
-        $this->sphinx->setFilterRange( 'year', 2000, 2040 );
+        $instance = $this->sphinx->setFilterRange( 'year', 2000, 2040 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -735,7 +821,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetFilterFloatRange()
     {
-        $this->sphinx->setFilterFloatRange( 'float_attribute', 6.5, 7.5 );
+        $instance = $this->sphinx->setFilterFloatRange( 'float_attribute', 6.5, 7.5 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_filters = $reflectionClass->getProperty('_filters');
@@ -775,7 +864,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGeoAnchor()
     {
-        $this->sphinx->setGeoAnchor( 'lat_attr', 'lon_attr', 7.5, 6.5 );
+        $instance = $this->sphinx->setGeoAnchor( 'lat_attr', 'lon_attr', 7.5, 6.5 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
+
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_anchor = $reflectionClass->getProperty('_anchor');
@@ -809,7 +902,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupBy_SPH_GROUPBY_DAY()
     {
-        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_DAY);
+        $instance = $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_DAY);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -832,7 +927,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupBy_SPH_GROUPBY_WEEK()
     {
-        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_WEEK);
+        $instance = $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_WEEK);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -855,7 +952,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupBy_SPH_GROUPBY_MONTH()
     {
-        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_MONTH);
+        $instance = $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_MONTH);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -878,7 +977,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupBy_SPH_GROUPBY_YEAR()
     {
-        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_YEAR);
+        $instance = $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_YEAR);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -901,7 +1002,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupBy_SPH_GROUPBY_ATTR()
     {
-        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_ATTR);
+        $instance = $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_ATTR);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -924,7 +1027,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupBy_SPH_GROUPBY_ATTRPAIR()
     {
-        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_ATTRPAIR);
+        $instance = $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_ATTRPAIR);
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -953,7 +1058,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupDistinct()
     {
-        $this->sphinx->setGroupDistinct( 'year' );
+        $instance = $this->sphinx->setGroupDistinct( 'year' );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -990,7 +1097,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetRetries()
     {
-        $this->sphinx->setRetries( 5, 1 );
+        $instance = $this->sphinx->setRetries( 5, 1 );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -1009,7 +1118,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetArrayResult()
     {
-        $this->sphinx->setArrayResult( true );
+        $instance = $this->sphinx->setArrayResult( true );
+
+        $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -1026,29 +1137,125 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx->setArrayResult( 2 );
     }
 
+    public function testSetOverrideErrorAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setOverride( NULL, SPH_ATTR_INTEGER, array(2004,2005,2006,2007));
+    }
+
+    public function testSetOverrideErrorAttributeTypeIsNotValid()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setOverride( 'year', 100000, array(2004,2005,2006,2007));
+    }
+
+    public function testSetOverrideErrorAttributeIsNotArray()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setOverride( 'year', SPH_ATTR_INTEGER, 2004);
+    }
+
     public function testSetOverride()
     {
+        $instance = $this->sphinx->setOverride( 'year', SPH_ATTR_INTEGER, array(2004,2005,2006,2007));
 
+        $this->assertInstanceOf($this->instanceName,$instance);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_overrides = $reflectionClass->getProperty('_overrides');
+        $_overrides->setAccessible(true);
+        $_overrides = $_overrides->getValue($this->sphinx);
+
+        $this->assertArrayHasKey('year',$_overrides);
+        $this->assertEquals('year',$_overrides['year']['attr']);
+        $this->assertEquals(SPH_ATTR_INTEGER,$_overrides['year']['type']);
+        $this->assertEquals(array(2004,2005,2006,2007),$_overrides['year']['values']);
+    }
+
+    public function testSetSelectErrorIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setSelect(NULL);
     }
 
     public function testSetSelect()
     {
+        $instance = $this->sphinx->setSelect( "*, @weight+(user_karma+ln(pageviews))*0.1 AS myweight" );
 
+        $this->assertInstanceOf($this->instanceName,$instance);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_select = $reflectionClass->getProperty('_select');
+        $_select->setAccessible(true);
+        $_select = $_select->getValue($this->sphinx);
+
+        $this->assertEquals("*, @weight+(user_karma+ln(pageviews))*0.1 AS myweight",$_select);
     }
 
     public function testResetFilters()
     {
+        $instance = $this->sphinx->resetFilters();
 
+        $this->assertInstanceOf($this->instanceName,$instance);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $_anchor = $reflectionClass->getProperty('_anchor');
+        $_anchor->setAccessible(true);
+        $_anchor = $_anchor->getValue($this->sphinx);
+
+        $this->assertEquals(array(),$_filters);
+        $this->assertEquals(array(),$_anchor);
     }
 
     public function testResetGroupBy()
     {
+        $instance = $this->sphinx->resetGroupBy();
 
+        $this->assertInstanceOf($this->instanceName,$instance);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $groupfunc->setAccessible(true);
+        $groupfunc = $groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $_groupdistinct = $reflectionClass->getProperty('_groupdistinct');
+        $_groupdistinct->setAccessible(true);
+        $_groupdistinct = $_groupdistinct->getValue($this->sphinx);
+
+        $this->assertEquals("",$_groupby);
+        $this->assertEquals(SPH_GROUPBY_DAY,$groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+        $this->assertEquals("",$_groupdistinct);
     }
 
     public function testResetOverrides()
     {
+        $instance = $this->sphinx->resetOverrides();
+        $this->assertInstanceOf($this->instanceName,$instance);
 
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_overrides = $reflectionClass->getProperty('_overrides');
+        $_overrides->setAccessible(true);
+        $_overrides = $_overrides->getValue($this->sphinx);
+
+        $this->assertEquals(array(),$_overrides);
     }
 
     public function testAddQuery()
