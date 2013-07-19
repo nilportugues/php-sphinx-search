@@ -475,7 +475,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("",$_sortby->getValue($this->sphinx));
     }
 
-
     public function testSetSortMode_SPH_SORT_RELEVANCE()
     {
         $this->sphinx->setSortMode( SPH_SORT_RELEVANCE );
@@ -560,20 +559,40 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("@relevance DESC, year DESC, @id DESC",$_sortby->getValue($this->sphinx));
     }
 
+    public function testSetIDRangeErrorMinIsNotNumeric()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setIDRange ( NULL, 10 );
+    }
 
+    public function testSetIDRangeErrorMaxIsNotNumeric()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setIDRange ( 100, NULL );
+    }
 
+    public function testSetIDRangeErrorMinIsGreaterThanMax()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setIDRange ( 100, 10 );
+    }
 
     public function testSetIDRange()
     {
+        $this->sphinx->setIDRange( 100, 200 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_min_id = $reflectionClass->getProperty('_min_id');
+        $_min_id->setAccessible(true);
+        $_min_id = $_min_id->getValue($this->sphinx);
+
+        $_max_id = $reflectionClass->getProperty('_max_id');
+        $_max_id->setAccessible(true);
+        $_max_id = $_max_id->getValue($this->sphinx);
+
+        $this->assertEquals(100,$_min_id);
+        $this->assertEquals(200,$_max_id);
     }
-
-
-
-
-
-
-
 
     public function testSetFilterWithoutExcludeFlag()
     {
@@ -650,23 +669,124 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($_filters[0]['exclude']);
     }
 
+    public function testSetFilterRangeErrorAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterRange( NULL, 2000, 2040 );
+    }
 
+    public function testSetFilterRangeErrorMinIsNotNumeric()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterRange( 'year' , NULL, 2040 );
+    }
 
+    public function testSetFilterRangeErrorMaxIsNotNumeric()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterRange( 'year', 2000, NULL );
+    }
 
+    public function testSetFilterRangeErrorMinIsGreaterThanMax()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterRange( 'year', 2040, 2000 );
+    }
 
     public function testSetFilterRange()
     {
+        $this->sphinx->setFilterRange( 'year', 2000, 2040 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('year',$_filters[0]['attr']);
+        $this->assertEquals(2000,$_filters[0]['min']);
+        $this->assertEquals(2040,$_filters[0]['max']);
+        $this->assertFalse($_filters[0]['exclude']);
+    }
+
+    public function testSetFilterFloatRangeErrorAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterFloatRange( NULL, 6.5, 7.5 );
+    }
+
+    public function testSetFilterFloatRangeErrorMinIsNotNumeric()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterFloatRange( 'float_attribute' , NULL, 7.5 );
+    }
+
+    public function testSetFilterFloatRangeErrorMaxIsNotNumeric()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterFloatRange( 'float_attribute', 6.5, NULL );
+    }
+
+    public function testSetFilterFloatRangeErrorMinIsGreaterThanMax()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setFilterFloatRange( 'float_attribute', 7.5, 6.5 );
     }
 
     public function testSetFilterFloatRange()
     {
+        $this->sphinx->setFilterFloatRange( 'float_attribute', 6.5, 7.5 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters->setAccessible(true);
+        $_filters = $_filters->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_filters[0]);
+        $this->assertEquals('float_attribute',$_filters[0]['attr']);
+        $this->assertEquals(6.5,$_filters[0]['min']);
+        $this->assertEquals(7.5,$_filters[0]['max']);
+        $this->assertFalse($_filters[0]['exclude']);
+    }
+
+    public function testSetGeoAnchorLatitudeAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGeoAnchor( NULL, 'lon_attr', 7.5, 6.5 );
+    }
+
+    public function testSetGeoAnchorLongitudeAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGeoAnchor( 'lat_attr', NULL, 7.5, 6.5 );
+    }
+
+    public function testSetGeoAnchorLatitudeValueIsNotFloat()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGeoAnchor( 'lat_attr', 'lon_attr', 7, 6.5 );
+    }
+
+    public function testSetGeoAnchorLongitudeValueIsNotFloat()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGeoAnchor( 'lat_attr', 'lon_attr', 7.5, 6 );
     }
 
     public function testSetGeoAnchor()
     {
+        $this->sphinx->setGeoAnchor( 'lat_attr', 'lon_attr', 7.5, 6.5 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_anchor = $reflectionClass->getProperty('_anchor');
+        $_anchor->setAccessible(true);
+        $_anchor = $_anchor->getValue($this->sphinx);
+
+        $this->assertInternalType('array',$_anchor);
+        $this->assertEquals(6.5,$_anchor['long']);
+        $this->assertEquals(7.5,$_anchor['lat']);
+        $this->assertEquals('lat_attr',$_anchor['attrlat']);
+        $this->assertEquals('lon_attr',$_anchor['attrlong']);
     }
 
     public function testSetGroupBy()
