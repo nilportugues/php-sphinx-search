@@ -117,7 +117,18 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testSetConnectTimeout()
     {
+        $this->sphinx->setConnectTimeout( 10 );
+        $reflectionClass = new \ReflectionClass($this->sphinx);
 
+        $_timeout = $reflectionClass->getProperty('_timeout');
+        $_timeout->setAccessible(true);
+        $this->assertEquals(10,$_timeout->getValue($this->sphinx));
+    }
+
+    public function testSetConnectTimeoutErrorOffsetBelowZero()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setConnectTimeout( -10 );
     }
 
     public function testSetLimits()

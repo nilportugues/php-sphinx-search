@@ -276,7 +276,8 @@ class SphinxClient
      */
     public function setConnectTimeout ( $timeout )
     {
-        assert ( is_numeric($timeout) );
+        assert ( is_int($timeout) );
+        assert ( $timeout >=0 );
         $this->_timeout = $timeout;
 
         return $this;
