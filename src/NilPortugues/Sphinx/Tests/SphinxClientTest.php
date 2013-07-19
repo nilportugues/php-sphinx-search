@@ -1260,18 +1260,72 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testAddQuery()
     {
+        $actual = $this->sphinx->addQuery("some search terms 1");
+        $this->assertEquals(0,$actual);
+
+        $actual = $this->sphinx->addQuery("some search terms 2");
+        $this->assertEquals(1,$actual);
+
+        $actual = $this->sphinx->addQuery("some search terms 3");
+        $this->assertEquals(2,$actual);
+    }
+
+    public function testAddQueryWithIndex()
+    {
+        $actual = $this->sphinx->addQuery("some search terms 1",'movies1');
+        $this->assertEquals(0,$actual);
+
+        $actual = $this->sphinx->addQuery("some search terms 2",'movies2');
+        $this->assertEquals(1,$actual);
+
+        $actual = $this->sphinx->addQuery("some search terms 3",'movies3');
+        $this->assertEquals(2,$actual);
 
     }
+
+    public function testAddQueryWithIndexAndComment()
+    {
+        $actual = $this->sphinx->addQuery("some search terms1",'movies1','This query fetches movie titles.');
+        $this->assertEquals(0,$actual);
+
+        $actual = $this->sphinx->addQuery("some search terms2",'movies2','This query fetches movie titles.');
+        $this->assertEquals(1,$actual);
+
+        $actual = $this->sphinx->addQuery("some search terms3",'movies3','This query fetches movie titles.');
+        $this->assertEquals(2,$actual);
+    }
+
 
     public function testRunQueries()
     {
 
     }
 
+    public function testBuildExcerptsError()
+    {
+
+    }
+
+
+    public function testBuildExcerptsFailsOnSearchd()
+    {
+        $docs = array();
+        $index = 'movies';
+        $words = 'The Amazing Spiderman';
+
+        $actual = $this->sphinx
+            ->setServer('2013.192.168.0.1')
+            ->buildExcerpts ( $docs, $index, $words )
+        ;
+
+        $this->assertEquals(false,$actual);
+    }
+
     public function testBuildExcerpts()
     {
 
     }
+
 
     public function testBuildKeywords()
     {
