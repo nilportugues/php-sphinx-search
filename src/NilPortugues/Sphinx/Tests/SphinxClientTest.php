@@ -789,24 +789,241 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('lon_attr',$_anchor['attrlong']);
     }
 
-    public function testSetGroupBy()
+    public function testSetGroupByErrorAttributeNotString()
     {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGroupBy( NULL, SPH_GROUPBY_DAY);
+    }
 
+    public function testSetGroupByErrorGroupSortNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_DAY, NULL);
+    }
+
+    public function testSetGroupByErrorGroupByNotValid()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGroupBy( 'year', 1000000000);
+    }
+
+    public function testSetGroupBy_SPH_GROUPBY_DAY()
+    {
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_DAY);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc->setAccessible(true);
+        $_groupfunc = $_groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupby);
+        $this->assertEquals(SPH_GROUPBY_DAY,$_groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+    }
+
+    public function testSetGroupBy_SPH_GROUPBY_WEEK()
+    {
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_WEEK);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc->setAccessible(true);
+        $_groupfunc = $_groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupby);
+        $this->assertEquals(SPH_GROUPBY_WEEK,$_groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+    }
+
+    public function testSetGroupBy_SPH_GROUPBY_MONTH()
+    {
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_MONTH);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc->setAccessible(true);
+        $_groupfunc = $_groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupby);
+        $this->assertEquals(SPH_GROUPBY_MONTH,$_groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+    }
+
+    public function testSetGroupBy_SPH_GROUPBY_YEAR()
+    {
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_YEAR);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc->setAccessible(true);
+        $_groupfunc = $_groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupby);
+        $this->assertEquals(SPH_GROUPBY_YEAR,$_groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+    }
+
+    public function testSetGroupBy_SPH_GROUPBY_ATTR()
+    {
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_ATTR);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc->setAccessible(true);
+        $_groupfunc = $_groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupby);
+        $this->assertEquals(SPH_GROUPBY_ATTR,$_groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+    }
+
+    public function testSetGroupBy_SPH_GROUPBY_ATTRPAIR()
+    {
+        $this->sphinx->setGroupBy( 'year', SPH_GROUPBY_ATTRPAIR);
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby->setAccessible(true);
+        $_groupby = $_groupby->getValue($this->sphinx);
+
+        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc->setAccessible(true);
+        $_groupfunc = $_groupfunc->getValue($this->sphinx);
+
+        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort->setAccessible(true);
+        $_groupsort = $_groupsort->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupby);
+        $this->assertEquals(SPH_GROUPBY_ATTRPAIR,$_groupfunc);
+        $this->assertEquals("@group desc",$_groupsort);
+    }
+
+    public function testSetGroupDistinctAttributeNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setGroupDistinct( 1 );
     }
 
     public function testSetGroupDistinct()
     {
+        $this->sphinx->setGroupDistinct( 'year' );
 
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_groupdistinct = $reflectionClass->getProperty('_groupdistinct');
+        $_groupdistinct->setAccessible(true);
+        $_groupdistinct = $_groupdistinct->getValue($this->sphinx);
+
+        $this->assertEquals('year',$_groupdistinct);
+    }
+
+    public function testSetRetriesErrorCountIsNotInteger()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setRetries( 'A' );
+    }
+
+    public function testSetRetriesErrorDelayIsNotInteger()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setRetries( 2, 'A' );
+    }
+
+    public function testSetRetriesErrorCountIsNegativeInteger()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setRetries( -2 );
+    }
+
+    public function testSetRetriesErrorDelayIsNegativeInteger()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setRetries( 2, -2 );
     }
 
     public function testSetRetries()
     {
+        $this->sphinx->setRetries( 5, 1 );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_retrycount = $reflectionClass->getProperty('_retrycount');
+        $_retrycount->setAccessible(true);
+        $_retrycount = $_retrycount->getValue($this->sphinx);
+
+        $_retrydelay = $reflectionClass->getProperty('_retrydelay');
+        $_retrydelay->setAccessible(true);
+        $_retrydelay = $_retrydelay->getValue($this->sphinx);
+
+        $this->assertEquals(5,$_retrycount);
+        $this->assertEquals(1,$_retrydelay);
 
     }
 
     public function testSetArrayResult()
     {
+        $this->sphinx->setArrayResult( true );
 
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+
+        $_arrayresult = $reflectionClass->getProperty('_arrayresult');
+        $_arrayresult->setAccessible(true);
+        $_arrayresult = $_arrayresult->getValue($this->sphinx);
+
+        $this->assertTrue($_arrayresult);
+    }
+
+    public function testSetArrayResultErrorParamIsNotBoolean()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setArrayResult( 2 );
     }
 
     public function testSetOverride()
