@@ -476,9 +476,13 @@ class SphinxClient
     {
         assert ( is_int($offset) );
         assert ( is_int($limit) );
+        assert ( is_int($max) );
+        assert ( is_int($cutoff) );
         assert ( $offset>=0 );
         assert ( $limit>0 );
         assert ( $max>=0 );
+        assert ( $cutoff>=0 );
+
         $this->_offset = $offset;
         $this->_limit = $limit;
         if ( $max>0 )
@@ -524,7 +528,13 @@ class SphinxClient
         return $this;
     }
 
-    /// set ranking mode
+    /**
+     * Sets ranking mode.
+     *
+     * @param $ranker
+     * @param string $rankexpr
+     * @return SphinxClient
+     */
     public function setRankingMode ( $ranker, $rankexpr="" )
     {
         assert ( $ranker===0 || $ranker>=1 && $ranker<SPH_RANK_TOTAL );
@@ -535,9 +545,17 @@ class SphinxClient
         return $this;
     }
 
-    /// set matches sorting mode
-    public function setSortMode ( $mode, $sortby="" )
+    /**
+     * Set matches sorting mode.
+     *
+     * @param $mode
+     * @param string $sortby
+     * @return SphinxClient
+     */
+    public function setSortMode ( $mode, $sortby = "" )
     {
+        settype($mode,'integer'); //If mode is not integer, defaults to SPH_SORT_RELEVANCE.
+
         assert (
             $mode==SPH_SORT_RELEVANCE ||
             $mode==SPH_SORT_ATTR_DESC ||
@@ -545,6 +563,7 @@ class SphinxClient
             $mode==SPH_SORT_TIME_SEGMENTS ||
             $mode==SPH_SORT_EXTENDED ||
             $mode==SPH_SORT_EXPR );
+
         assert ( is_string($sortby) );
         assert ( $mode==SPH_SORT_RELEVANCE || strlen($sortby)>0 );
 

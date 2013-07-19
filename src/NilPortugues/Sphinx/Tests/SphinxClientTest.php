@@ -143,6 +143,31 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(500,$_cutoff->getValue($this->sphinx));
     }
 
+    public function testSetLimitsErrorOffsetBelowZero()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setLimits( -10, 100, 1000, 500 );
+    }
+
+    public function testSetLimitsErrorLimitBelowZero()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setLimits( 10, -100, 1000, 500 );
+    }
+
+    public function testSetLimitsErrorMaxMatchesBelowZero()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setLimits( 10, 100, -1000, 500 );
+    }
+
+    public function testSetLimitsErrorCutOffBelowZero()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setLimits( 10, 100, 1000, -500 );
+    }
+
+
     public function testSetMaxQueryTime()
     {
         $this->sphinx->setMaxQueryTime( 10 );
@@ -152,6 +177,24 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_maxquerytime->setAccessible(true);
 
         $this->assertEquals(10,$_maxquerytime->getValue($this->sphinx));
+    }
+
+    public function testSetMaxQueryErrorTimeBelowZero()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setMaxQueryTime( -10 );
+    }
+
+    public function testSetMaxQueryErrorIsNotInteger()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setMaxQueryTime( NULL );
+    }
+
+    public function testSetMatchModeErrorValueIsNotValid()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setMatchMode( 100000000 );
     }
 
     public function testSetMatchMode_SPH_MATCH_ALL()
@@ -338,6 +381,18 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testSetRankingModeErrorValueIsNotValid()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setRankingMode( 100000000 );
+    }
+
+    public function testSetRankingModeErrorAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setRankingMode( SPH_RANK_SPH04, NULL );
+    }
+
     public function testSetWeights()
     {
         $this->setExpectedException('\Exception');
@@ -382,15 +437,120 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($weights,$_indexweights->getValue($this->sphinx));
     }
 
-
-
-
-
-
-    public function testSetSortMode()
+    public function testSetSortModeErrorValueIsNotValid()
     {
-
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setSortMode( 100000000 );
     }
+
+    public function testSetSortModeErrorAttributeIsNotString()
+    {
+        $this->setExpectedException('\PHPUnit_Framework_Error');
+        $this->sphinx->setSortMode( SPH_SORT_ATTR_DESC, NULL );
+    }
+
+    public function testSetSortModeErrorModeIsTextStringDefaultsTo_SPH_SORT_RELEVANCE()
+    {
+        $this->sphinx->setSortMode( "SPH_SORT_ATTR_DESC" );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertNotEquals(SPH_SORT_ATTR_DESC ,$_sort->getValue($this->sphinx));
+        $this->assertEquals(SPH_SORT_RELEVANCE ,$_sort->getValue($this->sphinx));
+        $this->assertEquals("",$_sortby->getValue($this->sphinx));
+    }
+
+
+    public function testSetSortMode_SPH_SORT_RELEVANCE()
+    {
+        $this->sphinx->setSortMode( SPH_SORT_RELEVANCE );
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertEquals(SPH_SORT_RELEVANCE ,$_sort->getValue($this->sphinx));
+        $this->assertEquals("",$_sortby->getValue($this->sphinx));
+    }
+
+    public function testSetSortMode_SPH_SORT_EXPR()
+    {
+        $this->sphinx->setSortMode(SPH_SORT_EXPR, "@weight + fulltext_field*200");
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertEquals(SPH_SORT_EXPR,$_sort->getValue($this->sphinx));
+        $this->assertEquals("@weight + fulltext_field*200",$_sortby->getValue($this->sphinx));
+    }
+
+    public function testSetSortMode_SPH_SORT_ATTR_DESC()
+    {
+        $this->sphinx->setSortMode(SPH_SORT_ATTR_DESC,'year');
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertEquals(SPH_SORT_ATTR_DESC,$_sort->getValue($this->sphinx));
+        $this->assertEquals("year",$_sortby->getValue($this->sphinx));
+    }
+
+    public function testSetSortMode_SPH_SORT_ATTR_ASC()
+    {
+        $this->sphinx->setSortMode(SPH_SORT_ATTR_ASC,'year');
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertEquals(SPH_SORT_ATTR_ASC,$_sort->getValue($this->sphinx));
+        $this->assertEquals("year",$_sortby->getValue($this->sphinx));
+    }
+
+    public function testSetSortMode_SPH_SORT_TIME_SEGMENTS()
+    {
+        $this->sphinx->setSortMode(SPH_SORT_TIME_SEGMENTS,'year');
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertEquals(SPH_SORT_TIME_SEGMENTS,$_sort->getValue($this->sphinx));
+        $this->assertEquals("year",$_sortby->getValue($this->sphinx));
+    }
+
+    public function testSetSortMode_SPH_SORT_EXTENDED()
+    {
+        $this->sphinx->setSortMode(SPH_SORT_EXTENDED,'@relevance DESC, year DESC, @id DESC');
+
+        $reflectionClass = new \ReflectionClass($this->sphinx);
+        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort->setAccessible(true);
+        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby->setAccessible(true);
+
+        $this->assertEquals(SPH_SORT_EXTENDED,$_sort->getValue($this->sphinx));
+        $this->assertEquals("@relevance DESC, year DESC, @id DESC",$_sortby->getValue($this->sphinx));
+    }
+
+
+
 
     public function testSetIDRange()
     {
