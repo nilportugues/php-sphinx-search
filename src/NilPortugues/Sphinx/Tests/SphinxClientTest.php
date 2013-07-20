@@ -47,6 +47,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testGetLastError()
     {
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
         $this->assertEquals('',$this->sphinx->getLastError());
     }
 
@@ -55,7 +56,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx->close();
         $this->sphinx
             ->setServer('2013.192.168.0.1')
-            ->query('test')
+            ->query('Spider-Man')
         ;
 
         $this->assertEquals
@@ -67,7 +68,12 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testGetLastErrorWhenConnectionNotEstablished()
     {
-
+        $this->sphinx->close();
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+        $this->sphinx->setServer(SPHINX_HOST,6666);
+        $this->sphinx->query('Spider-Man');
+        $this->sphinx->open();
+        $this->assertNotEmpty($this->sphinx->getLastError());
     }
 
     public function testGetLastWarning()

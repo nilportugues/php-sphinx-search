@@ -17,5 +17,6 @@ before_script:
   - sudo indexer --all
   - search "Spider"
   ## Check ports for Sphinx...
+  - sudo ifconfig
   - sudo iptables -I INPUT -p tcp --dport 9312 -j ACCEPT
   - sudo iptables -I INPUT -p udp --dport 9312 -j ACCEPT
