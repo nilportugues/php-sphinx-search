@@ -61,7 +61,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals
         (
-            'connection to 2013.192.168.0.1:9312 failed (errno=0, msg=php_network_getaddresses: getaddrinfo failed: Name or service not known)',
+            'connection to 2013.192.168.0.1:3312 failed (errno=0, msg=php_network_getaddresses: getaddrinfo failed: Name or service not known)',
             $this->sphinx->getLastError()
         );
     }
@@ -130,7 +130,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_port->setAccessible(true);
 
         $this->assertEquals( '', $_path->getValue($this->sphinx) );
-        $this->assertEquals( 9312, $_port->getValue($this->sphinx) );
+        $this->assertEquals( 3312, $_port->getValue($this->sphinx) );
     }
 
     public function testSetConnectTimeout()
