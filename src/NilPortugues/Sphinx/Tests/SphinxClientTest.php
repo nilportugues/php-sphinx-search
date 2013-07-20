@@ -1,8 +1,5 @@
 <?php
 
-define('SPHINX_HOST', '127.0.0.1');
-define('SPHINX_PORT', 9312);
-
 /**
  * Testing the SphinxClient class.
  * This does not test the search results returned by searchd.
@@ -18,6 +15,8 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
             $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
             $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
+            $this->sphinx->query('Spider-Man');
+            $this->sphinx->open();
     }
 
     public function testRemoveFilter()
@@ -53,6 +52,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testGetLastErrorWhenConnectingToNonExistentHost()
     {
+        $this->sphinx->close();
         $this->sphinx
             ->setServer('2013.192.168.0.1')
             ->query('test')
@@ -84,6 +84,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testIsConnectErrorWhenConnectionInitializedWithWrongData()
     {
+        $this->sphinx->close();
         $this->sphinx
             ->setServer('0.0.0.1',SPHINX_PORT)
             ->query('test')
@@ -1332,6 +1333,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildExcerptsFailsOnSearchd()
     {
+        $this->sphinx->close();
         $docs = array
         (
             'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
@@ -1406,12 +1408,12 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testCloseWhenConnectionEstablished()
     {
-        $this->assertTrue($this->sphinx->open());
         $this->assertTrue($this->sphinx->close());
     }
 
     public function testCloseWhenConnectionEstablishedWithWrongData()
     {
+        $this->sphinx->close();
         $this->sphinx
             ->setServer('2013.192.168.0.1')
             ->query('test')
@@ -1435,5 +1437,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(-1,$actual);
         $this->assertEquals("unexpected response length",$this->sphinx->getLastError());
       */
+    }
+
+    function tearDown()
+    {
+        $this->sphinx->close();
+        $this->sphinx = NULL;
     }
 }
