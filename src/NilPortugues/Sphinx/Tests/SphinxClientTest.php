@@ -1400,6 +1400,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testEscapeStringAtSymbol()
+    {
+        $actual = $this->sphinx->escapeString('@groupby \\at~ and & (symbols) mu-st "be" es/ca=ped ^__^$ ');
+        $this->assertEquals('\@groupby \\\\at\~ and \& \(symbols\) mu\-st \"be\" es\/ca\=ped \^__\^\$ ',$actual);
+    }
 
     /**
      * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
@@ -1407,12 +1412,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     public function testBuildKeywords()
     {
 
-    }
-
-    public function testEscapeStringAtSymbol()
-    {
-        $actual = $this->sphinx->escapeString('@groupby \\at~ and & (symbols) mu-st "be" es/ca=ped ^__^$ ');
-        $this->assertEquals('\@groupby \\\\at\~ and \& \(symbols\) mu\-st \"be\" es\/ca\=ped \^__\^\$ ',$actual);
     }
 
     public function testUpdateAttributes()
@@ -1431,6 +1430,21 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->sphinx->close());
     }
 
+    public function testFlushAttributesOK()
+    {
+        //$this->assertEquals("",$this->sphinx->getLastError());
+    }
+
+    public function testFlushAttributesKO()
+    {
+      /*  $actual = $this->sphinx->flushAttributes();
+
+        $this->assertEquals(-1,$actual);
+        $this->assertEquals("unexpected response length",$this->sphinx->getLastError());
+      */
+    }
+
+
     /**
      * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
      */
@@ -1445,21 +1459,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $actual = $this->sphinx->status();
         $this->assertInternalType('boolean',$actual);
         $this->assertFalse($actual);
-    }
-
-
-    public function testFlushAttributesOK()
-    {
-        //$this->assertEquals("",$this->sphinx->getLastError());
-    }
-
-    public function testFlushAttributesKO()
-    {
-      /*  $actual = $this->sphinx->flushAttributes();
-
-        $this->assertEquals(-1,$actual);
-        $this->assertEquals("unexpected response length",$this->sphinx->getLastError());
-      */
     }
 
     function tearDown()
