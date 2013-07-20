@@ -1360,7 +1360,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         );
         $words = 'Spider-Man';
 
-        $this->sphinx->query($words);
+        $this->sphinx->open();
         $actual = $this->sphinx->buildExcerpts( $docs, 'movies', $words);
 
         $this->assertInternalType('array',$actual);
@@ -1394,7 +1394,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     public function testCloseWhenConnectionNotEstablished()
     {
         $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
-        $this->sphinx->open();
+        $this->sphinx->close();
 
         $this->assertFalse($this->sphinx->close());
     }
