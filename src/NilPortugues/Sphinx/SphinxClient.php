@@ -235,7 +235,7 @@ class SphinxClient
     /**
      * Get last error flag. It's thought to be used to inform of network connection errors from searchd errors or broken responses.
      *
-     * @return integer
+     * @return boolean
      */
     public function isConnectError()
     {

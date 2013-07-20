@@ -76,11 +76,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($this->sphinx->getLastError());
     }
 
-    public function testGetLastWarning()
-    {
-
-    }
-
     public function testIsConnectErrorNoConnectionInitialized()
     {
         $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
@@ -1122,7 +1117,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(5,$_retrycount);
         $this->assertEquals(1,$_retrydelay);
-
     }
 
     public function testSetArrayResult()
@@ -1307,7 +1301,22 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testRunQueries()
     {
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+        $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
+        $this->sphinx->addQuery('Spider-Man','movies');
 
+        $actual = $this->sphinx->runQueries();
+        $this->assertInternalType('array',$actual);
+    }
+
+    public function testRunQueriesError()
+    {
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+        $this->sphinx->setServer(SPHINX_HOST,6666);
+        $this->sphinx->addQuery('Spider-Man','movies');
+
+        $actual = $this->sphinx->runQueries();
+        $this->assertFalse($actual);
     }
 
     public function testBuildExcerptsErrorDocsIsNotArray()
@@ -1372,7 +1381,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             );
             $words = 'Spider-Man';
 
-
             $actual = $this->sphinx->buildExcerpts( $docs, 'movies', $words);
 
             $this->assertInternalType('array',$actual);
@@ -1381,7 +1389,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         }
         else
         {
-             $this->markTestSkipped();
+             $this->markTestSkipped('testBuildExcerptsResults was skipped.');
         }
     }
 
