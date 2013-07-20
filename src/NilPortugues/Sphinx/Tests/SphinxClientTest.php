@@ -1395,8 +1395,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testCloseWhenConnectionNotEstablished()
     {
-        $this->sphinx->setServer('2013.192.168.0.1');
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
         $this->sphinx->open();
+
         $this->assertFalse($this->sphinx->close());
     }
 
