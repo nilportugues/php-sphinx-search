@@ -1,5 +1,7 @@
 <?php
 
+define('SPHINX_HOST', '127.0.0.1');
+define('SPHINX_PORT', 9312);
 
 /**
  * Testing the SphinxClient class.
@@ -1404,7 +1406,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testCloseWhenConnectionEstablished()
     {
-        $this->sphinx->open();
+        $this->assertTrue($this->sphinx->open());
         $this->assertTrue($this->sphinx->close());
     }
 
