@@ -4,6 +4,8 @@ php:
   - 5.4
   - 5.3
 before_script:
+  ## Some info for debugging...
+  - sudo uname -a
   ## Install Composer
   - composer install
   ## Set up a MySQL database to test Sphinx
@@ -15,5 +17,5 @@ before_script:
   - sudo indexer --all
   - search "Spider"
   ## Check ports for Sphinx...
-  - sudo netstat -nlp | grep searchd
-  - sudo netstat -nlp | grep 9312
+  - sudo iptables -I INPUT -p tcp --dport 9312 -j ACCEPT
+  - sudo iptables -I INPUT -p udp --dport 9312 -j ACCEPT
