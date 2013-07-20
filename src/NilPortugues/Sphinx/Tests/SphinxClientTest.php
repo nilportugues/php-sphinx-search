@@ -1362,21 +1362,27 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildExcerptsResults()
     {
+        if($this->sphinx->isConnectError()===false)
+        {
+            $docs = array
+            (
+                'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
+                'he Spider-Man series broke ground by featuring Peter Parker, a teenage high school student and person behind Spider-Man\'s secret identity to whose "self-obsessions with rejection, inadequacy, and loneliness" young readers could relate',
+                'Marvel has featured Spider-Man in several comic book series, the first and longest-lasting of which is titled The Amazing Spider-Man. Over the years, the Peter Parker character has developed from shy, nerdy high school student to troubled but outgoing college student, to married high school teacher to, in the late 2000s, a single freelance photographer, his most typical adult role'
+            );
+            $words = 'Spider-Man';
 
-        $docs = array
-        (
-           'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
-           'he Spider-Man series broke ground by featuring Peter Parker, a teenage high school student and person behind Spider-Man\'s secret identity to whose "self-obsessions with rejection, inadequacy, and loneliness" young readers could relate',
-           'Marvel has featured Spider-Man in several comic book series, the first and longest-lasting of which is titled The Amazing Spider-Man. Over the years, the Peter Parker character has developed from shy, nerdy high school student to troubled but outgoing college student, to married high school teacher to, in the late 2000s, a single freelance photographer, his most typical adult role'
-        );
-        $words = 'Spider-Man';
 
+            $actual = $this->sphinx->buildExcerpts( $docs, 'movies', $words);
 
-        $actual = $this->sphinx->buildExcerpts( $docs, 'movies', $words);
-
-        $this->assertInternalType('array',$actual);
-        $this->assertNotEmpty($actual);
-        $this->assertCount(3,$docs);
+            $this->assertInternalType('array',$actual);
+            $this->assertNotEmpty($actual);
+            $this->assertCount(3,$docs);
+        }
+        else
+        {
+             $this->markTestSkipped();
+        }
     }
 
 
