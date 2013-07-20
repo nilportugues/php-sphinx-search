@@ -15,7 +15,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
             $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
             $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
-            $this->sphinx->query('Spider-Man');
+            $this->sphinx->query('Spider-Man','movies');
             $this->sphinx->open();
     }
 
@@ -1349,11 +1349,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $index = 'movies';
         $words = 'Spider-Man';
 
-        $actual = $this->sphinx
+        $this->sphinx
             ->setServer('2013.192.168.0.1')
             ->query($words);
 
-        $this->sphinx->buildExcerpts ( $docs, $index, $words );
+        $actual = $this->sphinx->buildExcerpts ( $docs, $index, $words );
         $this->assertFalse($actual);
     }
 
@@ -1362,7 +1362,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildExcerptsResults()
     {
-        $this->sphinx->open();
+
         $docs = array
         (
            'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
@@ -1408,14 +1408,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx->close();
 
         $this->assertFalse($this->sphinx->close());
-    }
-
-    /**
-     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
-     */
-    public function testCloseWhenConnectionEstablished()
-    {
-        $this->assertTrue($this->sphinx->close());
     }
 
     /**
