@@ -15,5 +15,5 @@ before_script:
   - sudo indexer --all
   - search "Spider"
   ## Check ports for Sphinx...
-  - netstat -nlp | grep searchd
-  - netstat -nlp | grep 9312
+  - sudo netstat -nlp | grep searchd
+  - sudo netstat -nlp | grep 9312
