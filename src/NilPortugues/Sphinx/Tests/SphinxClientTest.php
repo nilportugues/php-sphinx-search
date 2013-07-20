@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * Testing the SphinxClient class.
  * This does not test the search results returned by searchd.
@@ -14,8 +15,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             $this->instanceName = '\NilPortugues\Sphinx\SphinxClient';
 
             $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
-            $this->sphinx
-                ->setServer(SPHINX_HOST,SPHINX_PORT);
+            $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
     }
 
     public function testRemoveFilter()
@@ -1325,35 +1325,51 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx->buildExcerpts ( array(), 'index', 'some keywords', NULL);
     }
 
+    /**
+     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     */
     public function testBuildExcerptsFailsOnSearchd()
     {
-        $docs = array();
+        $docs = array
+        (
+            'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
+            'he Spider-Man series broke ground by featuring Peter Parker, a teenage high school student and person behind Spider-Man\'s secret identity to whose "self-obsessions with rejection, inadequacy, and loneliness" young readers could relate',
+            'Marvel has featured Spider-Man in several comic book series, the first and longest-lasting of which is titled The Amazing Spider-Man. Over the years, the Peter Parker character has developed from shy, nerdy high school student to troubled but outgoing college student, to married high school teacher to, in the late 2000s, a single freelance photographer, his most typical adult role'
+        );
         $index = 'movies';
-        $words = 'The Amazing Spiderman';
+        $words = 'Spider-Man';
 
         $actual = $this->sphinx
             ->setServer('2013.192.168.0.1')
-            ->buildExcerpts ( $docs, $index, $words )
-        ;
+            ->query($words);
 
-        $this->assertEquals(false,$actual);
+        $this->sphinx->buildExcerpts ( $docs, $index, $words );
+
+
+        $this->assertFalse($actual);
     }
 
     /**
      * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
      */
-    public function testBuildExcerpts()
+    public function testBuildExcerptsResults()
     {
-        /*
-            $docs = array(1,2,3);
-            $index = 'movies';
-            $words = 'The Amazing Spiderman';
+        $docs = array
+        (
+           'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
+           'he Spider-Man series broke ground by featuring Peter Parker, a teenage high school student and person behind Spider-Man\'s secret identity to whose "self-obsessions with rejection, inadequacy, and loneliness" young readers could relate',
+           'Marvel has featured Spider-Man in several comic book series, the first and longest-lasting of which is titled The Amazing Spider-Man. Over the years, the Peter Parker character has developed from shy, nerdy high school student to troubled but outgoing college student, to married high school teacher to, in the late 2000s, a single freelance photographer, his most typical adult role'
+        );
+        $words = 'Spider-Man';
 
-            $actual = $this->sphinx->buildExcerpts( $docs, $index, $words );
+        $this->sphinx->query($words);
+        $actual = $this->sphinx->buildExcerpts( $docs, 'movies', $words);
 
-            $this->assertInternalType('array',$actual);
-        */
+        $this->assertInternalType('array',$actual);
+        $this->assertNotEmpty($actual);
+        $this->assertCount(3,$docs);
     }
+
 
     /**
      * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
