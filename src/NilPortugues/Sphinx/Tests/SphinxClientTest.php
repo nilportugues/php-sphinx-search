@@ -1301,12 +1301,19 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     public function testRunQueries()
     {
-        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
-        $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
-        $this->sphinx->addQuery('Spider-Man','movies');
+        if($this->sphinx->isConnectError()===false)
+        {
+            $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+            $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
+            $this->sphinx->addQuery('Spider-Man','movies');
 
-        $actual = $this->sphinx->runQueries();
-        $this->assertInternalType('array',$actual);
+            $actual = $this->sphinx->runQueries();
+            $this->assertInternalType('array',$actual);
+        }
+        else
+        {
+            $this->markTestSkipped();
+        }
     }
 
     public function testRunQueriesError()
