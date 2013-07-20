@@ -1379,7 +1379,18 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testCloseWhenConnectionNotEstablished()
     {
-        $actual = $this->sphinx->status();
+        $this->sphinx->setServer('2013.192.168.0.1');
+        $this->sphinx->open();
+        $this->assertFalse($this->sphinx->close());
+    }
+
+    /**
+     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     */
+    public function testCloseWhenConnectionEstablished()
+    {
+        $this->sphinx->open();
+        $this->assertTrue($this->sphinx->close());
     }
 
     public function testCloseWhenConnectionEstablishedWithWrongData()
@@ -1394,10 +1405,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($actual);
     }
 
-    public function testCloseWhenConnectionEstablished()
-    {
-
-    }
 
     public function testFlushAttributesOK()
     {
