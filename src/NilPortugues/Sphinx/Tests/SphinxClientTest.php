@@ -1344,8 +1344,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             ->query($words);
 
         $this->sphinx->buildExcerpts ( $docs, $index, $words );
-
-
         $this->assertFalse($actual);
     }
 
