@@ -17,4 +17,4 @@ before_script:
   - sudo indexer --all
   - search "Spider"
   - searchd
-  - sudo pkill searchd
+
