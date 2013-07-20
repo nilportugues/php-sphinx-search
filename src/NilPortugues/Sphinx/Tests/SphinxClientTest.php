@@ -1362,6 +1362,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildExcerptsResults()
     {
+        $this->sphinx->open();
         $docs = array
         (
            'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
@@ -1370,7 +1371,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         );
         $words = 'Spider-Man';
 
-        $this->sphinx->open();
+
         $actual = $this->sphinx->buildExcerpts( $docs, 'movies', $words);
 
         $this->assertInternalType('array',$actual);
@@ -1417,6 +1418,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->sphinx->close());
     }
 
+    /**
+     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     */
     public function testCloseWhenConnectionEstablishedWithWrongData()
     {
         $this->sphinx->close();
