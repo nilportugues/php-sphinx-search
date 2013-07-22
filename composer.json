@@ -5,6 +5,7 @@
     "keywords":[ "search", "sphinx", "sphinxapi", "sphinx search", "search engine" ],
     "homepage":"https://github.com/nilopc/NilPortugues_PHP_Sphinx",
     "license":"MIT",
+    "version": "1.0.0",
     "authors":[
         {
             "name":"Nil Portugués Calderó",

@@ -533,7 +533,7 @@ class SphinxClient
      * Sets ranking mode.
      *
      * @param $ranker
-     * @param string $rankexpr
+     * @param  string       $rankexpr
      * @return SphinxClient
      */
     public function setRankingMode ( $ranker, $rankexpr="" )
@@ -550,7 +550,7 @@ class SphinxClient
      * Set matches sorting mode.
      *
      * @param $mode
-     * @param string $sortby
+     * @param  string       $sortby
      * @return SphinxClient
      */
     public function setSortMode ( $mode, $sortby = "" )
@@ -577,7 +577,7 @@ class SphinxClient
     /**
      * DEPRECATED; Throws exception. Use SetFieldWeights() instead.
      *
-     * @param array $weights
+     * @param  array      $weights
      * @throws \Exception
      */
     public function setWeights ( array $weights )
@@ -1456,9 +1456,9 @@ class SphinxClient
      * Returns the amount of updated documents (0 or more) on success, or -1 on failure.
      *
      * @param $index
-     * @param array $attrs
-     * @param array $values
-     * @param bool $mva
+     * @param  array $attrs
+     * @param  array $values
+     * @param  bool  $mva
      * @return int
      */
     public function updateAttributes ( $index, array $attrs,array $values, $mva=false )

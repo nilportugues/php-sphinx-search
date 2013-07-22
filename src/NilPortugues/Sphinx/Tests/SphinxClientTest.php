@@ -196,7 +196,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx->setLimits( 10, 100, 1000, -500 );
     }
 
-
     public function testSetMaxQueryTime()
     {
         $instance = $this->sphinx->setMaxQueryTime( 10 );
@@ -396,7 +395,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
     }
 
-
     public function testSetRankingMode_SPH_RANK_BM25()
     {
         $instance = $this->sphinx->setRankingMode( SPH_RANK_BM25 );
@@ -430,7 +428,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $instance = $this->sphinx->setRankingMode( SPH_RANK_SPH04, "Some valid rank expression" );
 
         $this->assertInstanceOf($this->instanceName,$instance);
-        
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
         $_ranker = $reflectionClass->getProperty('_ranker');
@@ -495,7 +493,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $instance = $this->sphinx->SetIndexWeights($weights);
 
         $this->assertInstanceOf($this->instanceName,$instance);
-        
+
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_indexweights = $reflectionClass->getProperty('_indexweights');
         $_indexweights->setAccessible(true);
@@ -871,7 +869,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $instance = $this->sphinx->setGeoAnchor( 'lat_attr', 'lon_attr', 7.5, 6.5 );
 
         $this->assertInstanceOf($this->instanceName,$instance);
-
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
@@ -1298,20 +1295,16 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2,$actual);
     }
 
-
     public function testRunQueries()
     {
-        if($this->sphinx->isConnectError()===false)
-        {
+        if ($this->sphinx->isConnectError()===false) {
             $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
             $this->sphinx->setServer(SPHINX_HOST,SPHINX_PORT);
             $this->sphinx->addQuery('Spider-Man','movies');
 
             $actual = $this->sphinx->runQueries();
             $this->assertInternalType('array',$actual);
-        }
-        else
-        {
+        } else {
             $this->markTestSkipped();
         }
     }
@@ -1378,8 +1371,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildExcerptsResults()
     {
-        if($this->sphinx->isConnectError()===false)
-        {
+        if ($this->sphinx->isConnectError()===false) {
             $docs = array
             (
                 'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
@@ -1393,9 +1385,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('array',$actual);
             $this->assertNotEmpty($actual);
             $this->assertCount(3,$docs);
-        }
-        else
-        {
+        } else {
              $this->markTestSkipped('testBuildExcerptsResults was skipped.');
         }
     }
@@ -1411,8 +1401,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildKeywordsWithExistingKeyWord()
     {
-        if($this->sphinx->isConnectError()===false)
-        {
+        if ($this->sphinx->isConnectError()===false) {
 
             $query = 'Spider-Man';
             $hits = true;
@@ -1421,9 +1410,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('array',$actual);
             $this->assertNotEmpty($actual);
             $this->assertEquals(6,$actual[0]['docs']);
-        }
-        else
-        {
+        } else {
             $this->markTestSkipped('testBuildKeywordsWithExistingKeyWord was skipped.');
         }
     }
@@ -1433,8 +1420,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuildKeywordsWithNonExistentKeyWord()
     {
-        if($this->sphinx->isConnectError()===false)
-        {
+        if ($this->sphinx->isConnectError()===false) {
             $query = 'Batman';
             $hits = true;
             $actual = $this->sphinx->buildKeywords ( $query, 'movies', $hits );
@@ -1442,9 +1428,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('array',$actual);
             $this->assertNotEmpty($actual);
             $this->assertEquals(0,$actual[0]['docs']);
-        }
-        else
-        {
+        } else {
             $this->markTestSkipped('testBuildKeywordsWithNonExistentKeyWord was skipped.');
         }
     }
@@ -1463,13 +1447,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdateAttributes()
     {
-        if($this->sphinx->isConnectError()===false)
-        {
+        if ($this->sphinx->isConnectError()===false) {
             $actual = $this->sphinx->updateAttributes('movies',array('year'), array(2020 => array(2040)) );
             $this->assertNotEquals(-1,$actual);
-        }
-        else
-        {
+        } else {
             $this->markTestSkipped('testUpdateAttributes was skipped.');
         }
     }
@@ -1490,13 +1471,10 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testFlushAttributes()
     {
-        if($this->sphinx->isConnectError()===false)
-        {
+        if ($this->sphinx->isConnectError()===false) {
             $actual = $this->sphinx->flushAttributes();
             $this->assertNotEquals(-1,$actual);
-        }
-        else
-        {
+        } else {
             $this->markTestSkipped('testFlushAttributes was skipped.');
         }
     }
@@ -1526,7 +1504,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($actual);
     }
 
-    function tearDown()
+    public function tearDown()
     {
         $this->sphinx->close();
         $this->sphinx = NULL;
