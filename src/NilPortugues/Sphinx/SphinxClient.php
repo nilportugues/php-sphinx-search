@@ -1456,12 +1456,12 @@ class SphinxClient
      * Returns the amount of updated documents (0 or more) on success, or -1 on failure.
      *
      * @param $index
-     * @param $attrs
-     * @param $values
-     * @param  bool $mva
+     * @param array $attrs
+     * @param array $values
+     * @param bool $mva
      * @return int
      */
-    public function updateAttributes ( $index, $attrs, $values, $mva=false )
+    public function updateAttributes ( $index, array $attrs,array $values, $mva=false )
     {
         // verify everything
         assert ( is_string($index) );

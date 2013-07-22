@@ -1351,7 +1351,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
      */
     public function testBuildExcerptsFailsOnSearchd()
     {
@@ -1374,7 +1374,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
      */
     public function testBuildExcerptsResults()
     {
@@ -1383,7 +1383,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
             $docs = array
             (
                 'Spider-Man is a fictional character, a comic book superhero who appears in comic books published by Marvel Comics.',
-                'he Spider-Man series broke ground by featuring Peter Parker, a teenage high school student and person behind Spider-Man\'s secret identity to whose "self-obsessions with rejection, inadequacy, and loneliness" young readers could relate',
+                'The Spider-Man series broke ground by featuring Peter Parker, a teenage high school student and person behind Spider-Man\'s secret identity to whose "self-obsessions with rejection, inadequacy, and loneliness" young readers could relate',
                 'Marvel has featured Spider-Man in several comic book series, the first and longest-lasting of which is titled The Amazing Spider-Man. Over the years, the Peter Parker character has developed from shy, nerdy high school student to troubled but outgoing college student, to married high school teacher to, in the late 2000s, a single freelance photographer, his most typical adult role'
             );
             $words = 'Spider-Man';
@@ -1407,20 +1407,75 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
      */
-    public function testBuildKeywords()
+    public function testBuildKeywordsWithExistingKeyWord()
     {
+        if($this->sphinx->isConnectError()===false)
+        {
 
-    }
+            $query = 'Spider-Man';
+            $hits = true;
+            $actual = $this->sphinx->buildKeywords ( $query, 'movies', $hits );
 
-    public function testUpdateAttributes()
-    {
-
+            $this->assertInternalType('array',$actual);
+            $this->assertNotEmpty($actual);
+            $this->assertEquals(6,$actual[0]['docs']);
+        }
+        else
+        {
+            $this->markTestSkipped('testBuildKeywordsWithExistingKeyWord was skipped.');
+        }
     }
 
     /**
-     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
+     */
+    public function testBuildKeywordsWithNonExistentKeyWord()
+    {
+        if($this->sphinx->isConnectError()===false)
+        {
+            $query = 'Batman';
+            $hits = true;
+            $actual = $this->sphinx->buildKeywords ( $query, 'movies', $hits );
+
+            $this->assertInternalType('array',$actual);
+            $this->assertNotEmpty($actual);
+            $this->assertEquals(0,$actual[0]['docs']);
+        }
+        else
+        {
+            $this->markTestSkipped('testBuildKeywordsWithNonExistentKeyWord was skipped.');
+        }
+    }
+
+    public function testUpdateAttributesError()
+    {
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+
+        //Update year value from 2020 to 2040.
+        $actual = $this->sphinx->updateAttributes('movies',array('year'), array(2020 => array(2040)) );
+        $this->assertEquals(-1,$actual);
+    }
+
+    /**
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
+     */
+    public function testUpdateAttributes()
+    {
+        if($this->sphinx->isConnectError()===false)
+        {
+            $actual = $this->sphinx->updateAttributes('movies',array('year'), array(2020 => array(2040)) );
+            $this->assertNotEquals(-1,$actual);
+        }
+        else
+        {
+            $this->markTestSkipped('testUpdateAttributes was skipped.');
+        }
+    }
+
+    /**
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
      */
     public function testCloseWhenConnectionNotEstablished()
     {
@@ -1430,23 +1485,33 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->sphinx->close());
     }
 
-    public function testFlushAttributesOK()
+    /**
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
+     */
+    public function testFlushAttributes()
     {
-        //$this->assertEquals("",$this->sphinx->getLastError());
+        if($this->sphinx->isConnectError()===false)
+        {
+            $actual = $this->sphinx->flushAttributes();
+            $this->assertNotEquals(-1,$actual);
+        }
+        else
+        {
+            $this->markTestSkipped('testFlushAttributes was skipped.');
+        }
     }
 
-    public function testFlushAttributesKO()
+    public function testFlushAttributesError()
     {
-      /*  $actual = $this->sphinx->flushAttributes();
+        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
+        $actual = $this->sphinx->flushAttributes();
 
         $this->assertEquals(-1,$actual);
-        $this->assertEquals("unexpected response length",$this->sphinx->getLastError());
-      */
+        $this->assertNotEmpty($this->sphinx->getLastError());
     }
 
-
     /**
-     * Needs a valid Sphinx.conf loaded to indexer to be tested properly.
+     * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
      */
     public function testCloseWhenConnectionEstablishedWithWrongData()
     {
