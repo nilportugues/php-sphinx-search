@@ -1,6 +1,6 @@
 {
     "name":"nilportugues/sphinx-search",
-    "description":"SphinxSearch (SphinxAPI) for PHP5.3 and above. Fully Unit Tested. ",
+    "description":"Fully unit tested SphinxClient (SphinxAPI) for PHP5.3 and above to be used with SphinxSearch",
     "type":"library",
     "keywords":[ "search", "sphinx", "sphinxapi", "sphinx search", "search engine" ],
     "homepage":"https://github.com/nilopc/NilPortugues_PHP_Sphinx",
