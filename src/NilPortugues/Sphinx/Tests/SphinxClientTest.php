@@ -1,5 +1,7 @@
 <?php
 
+namespace NilPortugues\Sphinx\Tests;
+
 /**
  * Testing the SphinxClient class.
  * This does not test the search results returned by searchd.
