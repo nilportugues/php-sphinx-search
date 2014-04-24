@@ -1544,9 +1544,9 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $groupBy->setAccessible(true);
         $groupBy = $groupBy->getValue($this->sphinx);
 
-        $groupfunc = $reflectionClass->getProperty('groupFunc');
-        $groupfunc->setAccessible(true);
-        $groupfunc = $groupfunc->getValue($this->sphinx);
+        $groupFunc = $reflectionClass->getProperty('groupFunc');
+        $groupFunc->setAccessible(true);
+        $groupFunc = $groupFunc->getValue($this->sphinx);
 
         $groupSort = $reflectionClass->getProperty('groupSort');
         $groupSort->setAccessible(true);
@@ -1557,7 +1557,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $groupDistinct = $groupDistinct->getValue($this->sphinx);
 
         $this->assertEquals("", $groupBy);
-        $this->assertEquals(SPH_GROUPBY_DAY, $groupfunc);
+        $this->assertEquals(SPH_GROUPBY_DAY, $groupFunc);
         $this->assertEquals("@group desc", $groupSort);
         $this->assertEquals("", $groupDistinct);
     }
