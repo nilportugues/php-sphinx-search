@@ -106,7 +106,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_path = $reflectionClass->getProperty('_path');
         $_path->setAccessible(true);
 
-        $_port = $reflectionClass->getProperty('_port');
+        $_port = $reflectionClass->getProperty('port');
         $_port->setAccessible(true);
 
         $this->assertEquals( '', $_path->getValue($this->sphinx) );
@@ -123,7 +123,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_path = $reflectionClass->getProperty('_path');
         $_path->setAccessible(true);
 
-        $_port = $reflectionClass->getProperty('_port');
+        $_port = $reflectionClass->getProperty('port');
         $_port->setAccessible(true);
 
         $this->assertEquals( '', $_path->getValue($this->sphinx) );
@@ -156,7 +156,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_offset = $reflectionClass->getProperty('_offset');
+        $_offset = $reflectionClass->getProperty('offset');
         $_offset->setAccessible(true);
 
         $_limit = $reflectionClass->getProperty('_limit');
@@ -497,7 +497,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_indexweights = $reflectionClass->getProperty('_indexweights');
+        $_indexweights = $reflectionClass->getProperty('indexWeights');
         $_indexweights->setAccessible(true);
 
         $this->assertEquals($weights,$_indexweights->getValue($this->sphinx));
@@ -524,7 +524,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertNotEquals(SPH_SORT_ATTR_DESC ,$_sort->getValue($this->sphinx));
@@ -541,7 +541,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertEquals(SPH_SORT_RELEVANCE ,$_sort->getValue($this->sphinx));
@@ -557,7 +557,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertEquals(SPH_SORT_EXPR,$_sort->getValue($this->sphinx));
@@ -573,7 +573,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertEquals(SPH_SORT_ATTR_DESC,$_sort->getValue($this->sphinx));
@@ -589,7 +589,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertEquals(SPH_SORT_ATTR_ASC,$_sort->getValue($this->sphinx));
@@ -605,7 +605,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertEquals(SPH_SORT_TIME_SEGMENTS,$_sort->getValue($this->sphinx));
@@ -621,7 +621,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass($this->sphinx);
         $_sort = $reflectionClass->getProperty('_sort');
         $_sort->setAccessible(true);
-        $_sortby = $reflectionClass->getProperty('_sortby');
+        $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
 
         $this->assertEquals(SPH_SORT_EXTENDED,$_sort->getValue($this->sphinx));
@@ -911,15 +911,15 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc = $reflectionClass->getProperty('groupFunc');
         $_groupfunc->setAccessible(true);
         $_groupfunc = $_groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
@@ -936,15 +936,15 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc = $reflectionClass->getProperty('groupFunc');
         $_groupfunc->setAccessible(true);
         $_groupfunc = $_groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
@@ -961,15 +961,15 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc = $reflectionClass->getProperty('groupFunc');
         $_groupfunc->setAccessible(true);
         $_groupfunc = $_groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
@@ -986,15 +986,15 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc = $reflectionClass->getProperty('groupFunc');
         $_groupfunc->setAccessible(true);
         $_groupfunc = $_groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
@@ -1011,15 +1011,15 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc = $reflectionClass->getProperty('groupFunc');
         $_groupfunc->setAccessible(true);
         $_groupfunc = $_groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
@@ -1036,15 +1036,15 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $_groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $_groupfunc = $reflectionClass->getProperty('groupFunc');
         $_groupfunc->setAccessible(true);
         $_groupfunc = $_groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
@@ -1067,7 +1067,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupdistinct = $reflectionClass->getProperty('_groupdistinct');
+        $_groupdistinct = $reflectionClass->getProperty('groupDistinct');
         $_groupdistinct->setAccessible(true);
         $_groupdistinct = $_groupdistinct->getValue($this->sphinx);
 
@@ -1110,7 +1110,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_retrycount->setAccessible(true);
         $_retrycount = $_retrycount->getValue($this->sphinx);
 
-        $_retrydelay = $reflectionClass->getProperty('_retrydelay');
+        $_retrydelay = $reflectionClass->getProperty('retryDelay');
         $_retrydelay->setAccessible(true);
         $_retrydelay = $_retrydelay->getValue($this->sphinx);
 
@@ -1126,7 +1126,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_arrayresult = $reflectionClass->getProperty('_arrayresult');
+        $_arrayresult = $reflectionClass->getProperty('arrayResult');
         $_arrayresult->setAccessible(true);
         $_arrayresult = $_arrayresult->getValue($this->sphinx);
 
@@ -1224,19 +1224,19 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_groupby = $reflectionClass->getProperty('_groupby');
+        $_groupby = $reflectionClass->getProperty('groupBy');
         $_groupby->setAccessible(true);
         $_groupby = $_groupby->getValue($this->sphinx);
 
-        $groupfunc = $reflectionClass->getProperty('_groupfunc');
+        $groupfunc = $reflectionClass->getProperty('groupFunc');
         $groupfunc->setAccessible(true);
         $groupfunc = $groupfunc->getValue($this->sphinx);
 
-        $_groupsort = $reflectionClass->getProperty('_groupsort');
+        $_groupsort = $reflectionClass->getProperty('groupSort');
         $_groupsort->setAccessible(true);
         $_groupsort = $_groupsort->getValue($this->sphinx);
 
-        $_groupdistinct = $reflectionClass->getProperty('_groupdistinct');
+        $_groupdistinct = $reflectionClass->getProperty('groupDistinct');
         $_groupdistinct->setAccessible(true);
         $_groupdistinct = $_groupdistinct->getValue($this->sphinx);
 
