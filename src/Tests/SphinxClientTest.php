@@ -26,7 +26,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx->setFilter('year',array(2014));
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
         $_filters = $_filters[0];
@@ -39,7 +39,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf($this->instanceName,$instance);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -103,7 +103,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_path = $reflectionClass->getProperty('_path');
+        $_path = $reflectionClass->getProperty('path');
         $_path->setAccessible(true);
 
         $_port = $reflectionClass->getProperty('port');
@@ -120,7 +120,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_path = $reflectionClass->getProperty('_path');
+        $_path = $reflectionClass->getProperty('path');
         $_path->setAccessible(true);
 
         $_port = $reflectionClass->getProperty('port');
@@ -137,7 +137,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_timeout = $reflectionClass->getProperty('_timeout');
+        $_timeout = $reflectionClass->getProperty('timeout');
         $_timeout->setAccessible(true);
         $this->assertEquals(10,$_timeout->getValue($this->sphinx));
     }
@@ -159,13 +159,13 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $_offset = $reflectionClass->getProperty('offset');
         $_offset->setAccessible(true);
 
-        $_limit = $reflectionClass->getProperty('_limit');
+        $_limit = $reflectionClass->getProperty('limit');
         $_limit->setAccessible(true);
 
-        $_maxmatches = $reflectionClass->getProperty('_maxmatches');
+        $_maxmatches = $reflectionClass->getProperty('maxMatches');
         $_maxmatches->setAccessible(true);
 
-        $_cutoff = $reflectionClass->getProperty('_cutoff');
+        $_cutoff = $reflectionClass->getProperty('cutOff');
         $_cutoff->setAccessible(true);
 
         $this->assertEquals(10,$_offset->getValue($this->sphinx));
@@ -205,7 +205,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_maxquerytime = $reflectionClass->getProperty('_maxquerytime');
+        $_maxquerytime = $reflectionClass->getProperty('maxQueryTime');
         $_maxquerytime->setAccessible(true);
 
         $this->assertEquals(10,$_maxquerytime->getValue($this->sphinx));
@@ -235,7 +235,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_ALL,$_mode->getValue($this->sphinx));
@@ -247,7 +247,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_ANY,$_mode->getValue($this->sphinx));
@@ -259,7 +259,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_PHRASE,$_mode->getValue($this->sphinx));
@@ -271,7 +271,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_BOOLEAN,$_mode->getValue($this->sphinx));
@@ -283,7 +283,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_EXTENDED,$_mode->getValue($this->sphinx));
@@ -295,7 +295,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_FULLSCAN,$_mode->getValue($this->sphinx));
@@ -307,7 +307,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_mode = $reflectionClass->getProperty('_mode');
+        $_mode = $reflectionClass->getProperty('mode');
         $_mode->setAccessible(true);
 
         $this->assertEquals(SPH_MATCH_EXTENDED2,$_mode->getValue($this->sphinx));
@@ -321,7 +321,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_EXPR,$_ranker->getValue($this->sphinx));
 
@@ -335,7 +335,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_FIELDMASK,$_ranker->getValue($this->sphinx));
 
@@ -349,7 +349,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_MATCHANY,$_ranker->getValue($this->sphinx));
 
@@ -363,7 +363,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_WORDCOUNT,$_ranker->getValue($this->sphinx));
 
@@ -377,7 +377,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_PROXIMITY,$_ranker->getValue($this->sphinx));
 
@@ -391,7 +391,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_PROXIMITY_BM25,$_ranker->getValue($this->sphinx));
 
@@ -405,7 +405,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_BM25,$_ranker->getValue($this->sphinx));
 
@@ -419,7 +419,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_NONE,$_ranker->getValue($this->sphinx));
 
@@ -433,11 +433,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_ranker = $reflectionClass->getProperty('_ranker');
+        $_ranker = $reflectionClass->getProperty('ranker');
         $_ranker->setAccessible(true);
         $this->assertEquals(SPH_RANK_SPH04,$_ranker->getValue($this->sphinx));
 
-        $_rankexpr = $reflectionClass->getProperty('_rankexpr');
+        $_rankexpr = $reflectionClass->getProperty('rankExpr');
         $_rankexpr->setAccessible(true);
         $this->assertEquals("Some valid rank expression",$_rankexpr->getValue($this->sphinx));
 
@@ -479,7 +479,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_fieldweights = $reflectionClass->getProperty('_fieldweights');
+        $_fieldweights = $reflectionClass->getProperty('fieldWeights');
         $_fieldweights->setAccessible(true);
 
         $this->assertEquals($weights,$_fieldweights->getValue($this->sphinx));
@@ -522,7 +522,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -539,7 +539,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -555,7 +555,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -571,7 +571,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -587,7 +587,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -603,7 +603,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -619,7 +619,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->instanceName,$instance);
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
-        $_sort = $reflectionClass->getProperty('_sort');
+        $_sort = $reflectionClass->getProperty('sort');
         $_sort->setAccessible(true);
         $_sortby = $reflectionClass->getProperty('sortBy');
         $_sortby->setAccessible(true);
@@ -654,11 +654,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_min_id = $reflectionClass->getProperty('_min_id');
+        $_min_id = $reflectionClass->getProperty('minId');
         $_min_id->setAccessible(true);
         $_min_id = $_min_id->getValue($this->sphinx);
 
-        $_max_id = $reflectionClass->getProperty('_max_id');
+        $_max_id = $reflectionClass->getProperty('maxId');
         $_max_id->setAccessible(true);
         $_max_id = $_max_id->getValue($this->sphinx);
 
@@ -674,7 +674,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -692,7 +692,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -710,7 +710,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -728,7 +728,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -746,7 +746,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -788,7 +788,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -831,7 +831,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
@@ -874,7 +874,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_anchor = $reflectionClass->getProperty('_anchor');
+        $_anchor = $reflectionClass->getProperty('anchor');
         $_anchor->setAccessible(true);
         $_anchor = $_anchor->getValue($this->sphinx);
 
@@ -1106,7 +1106,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_retrycount = $reflectionClass->getProperty('_retrycount');
+        $_retrycount = $reflectionClass->getProperty('retryCount');
         $_retrycount->setAccessible(true);
         $_retrycount = $_retrycount->getValue($this->sphinx);
 
@@ -1165,7 +1165,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_overrides = $reflectionClass->getProperty('_overrides');
+        $_overrides = $reflectionClass->getProperty('overrides');
         $_overrides->setAccessible(true);
         $_overrides = $_overrides->getValue($this->sphinx);
 
@@ -1189,7 +1189,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_select = $reflectionClass->getProperty('_select');
+        $_select = $reflectionClass->getProperty('select');
         $_select->setAccessible(true);
         $_select = $_select->getValue($this->sphinx);
 
@@ -1204,11 +1204,11 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_filters = $reflectionClass->getProperty('_filters');
+        $_filters = $reflectionClass->getProperty('filters');
         $_filters->setAccessible(true);
         $_filters = $_filters->getValue($this->sphinx);
 
-        $_anchor = $reflectionClass->getProperty('_anchor');
+        $_anchor = $reflectionClass->getProperty('anchor');
         $_anchor->setAccessible(true);
         $_anchor = $_anchor->getValue($this->sphinx);
 
@@ -1253,7 +1253,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
 
         $reflectionClass = new \ReflectionClass($this->sphinx);
 
-        $_overrides = $reflectionClass->getProperty('_overrides');
+        $_overrides = $reflectionClass->getProperty('overrides');
         $_overrides->setAccessible(true);
         $_overrides = $_overrides->getValue($this->sphinx);
 

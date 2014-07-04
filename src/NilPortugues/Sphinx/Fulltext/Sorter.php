@@ -18,5 +18,20 @@ class Sorter
     const EXTENDED = 4;
     const EXPR = 5;
 
+    /**
+     * @param $mode
+     * @return bool
+     */
+    public function isValid($mode)
+    {
+        return (
+            $mode == Sorter::RELEVANCE
+            || $mode == Sorter::ATTR_DESC
+            || $mode == Sorter::ATTR_ASC
+            || $mode == Sorter::TIME_SEGMENTS
+            || $mode == Sorter::EXTENDED
+            || $mode == Sorter::EXPR
+        );
+    }
 }
  

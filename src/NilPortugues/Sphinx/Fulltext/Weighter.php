@@ -7,11 +7,10 @@ namespace NilPortugues\Sphinx\Fulltext;
  */
 class Weighter
 {
-
     /**
      * DEPRECATED; Throws exception. Use SetFieldWeights() instead.
      *
-     * @param  array      $weights
+     * @param  array $weights
      * @throws \Exception
      */
     public function setWeights(array $weights)
@@ -25,16 +24,16 @@ class Weighter
      * Bind per-field weights by name.
      *
      * @param $weights
-     * @return SphinxClient
      */
     public function setFieldWeights(array $weights)
     {
         assert(is_array($weights));
+
         foreach ($weights as $name => $weight) {
             assert(is_string($name));
             assert(is_int($weight));
         }
-        $this->_fieldweights = $weights;
+        $this->fieldWeights = $weights;
 
         return $this;
     }
@@ -42,17 +41,16 @@ class Weighter
     /**
      * Bind per-index weights by name.
      *
-     * @param  array        $weights
-     * @return SphinxClient
+     * @param  array $weights
      */
     public function setIndexWeights(array $weights)
     {
-        assert(is_array($weights));
         foreach ($weights as $index => $weight) {
             assert(is_string($index));
             assert(is_int($weight));
         }
-        $this->_indexweights = $weights;
+
+        $this->indexWeights = $weights;
 
         return $this;
     }

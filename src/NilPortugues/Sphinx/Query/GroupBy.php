@@ -13,5 +13,21 @@ class GroupBy
     const YEAR = 3;
     const ATTR = 4;
     const ATTRPAIR = 5;
+
+    /**
+     * @param $func
+     * @return bool
+     */
+    public function isValid($func)
+    {
+        return (
+            $func == GroupBy::DAY
+            || $func == GroupBy::WEEK
+            || $func == GroupBy::MONTH
+            || $func == GroupBy::YEAR
+            || $func == GroupBy::ATTR
+            || $func == GroupBy::ATTRPAIR
+        );
+    }
 }
  

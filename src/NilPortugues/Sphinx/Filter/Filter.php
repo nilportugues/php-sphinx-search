@@ -20,11 +20,11 @@ class Filter
      * @author: Nil Portugués Calderó
      *
      * @param $attribute
-     * @return SphinxClient
      */
     public function removeFilter($attribute)
     {
-        assert(is_string($attribute));
+        $attribute = (string) $attribute;
+
         foreach ($this->_filters as $key => $filter) {
             if ($filter['attr'] == $attribute) {
                 unset($this->_filters[$key]);

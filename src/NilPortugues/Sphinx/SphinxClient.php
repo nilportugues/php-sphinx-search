@@ -13,6 +13,8 @@
 
 namespace NilPortugues\Sphinx;
 
+use NilPortugues\Sphinx\Client\Connection;
+use NilPortugues\Sphinx\Client\Response;
 use NilPortugues\Sphinx\Helpers\MultiByte;
 use NilPortugues\Sphinx\Helpers\Packer;
 use NilPortugues\Sphinx\Filter\Filter;
@@ -32,42 +34,249 @@ use NilPortugues\Sphinx\Searchd\Version;
  */
 class SphinxClient
 {
-    private $host; // searchd host (default is "localhost")
-    private $port; // searchd port (default is 9312)
-    private $offset; // how many records to seek from result-set start (default is 0)
-    private $_limit; // how many records to return from result-set starting at offset (default is 20)
-    private $_mode; // query matching mode (default is Matcher::ALL)
-    private $_weights; // per-field weights (default is 1 for all fields)
-    private $_sort; // match sorting mode (default is Sorter::RELEVANCE)
-    private $sortBy; // attribute to sort by (defualt is "")
-    private $_min_id; // min ID to match (default is 0, which means no limit)
-    private $_max_id; // max ID to match (default is 0, which means no limit)
-    private $_filters; // search filters
-    private $groupBy; // group-by attribute name
-    private $groupFunc; // group-by function (to pre-process group-by attribute value with)
-    private $groupSort; // group-by sorting clause (to sort groups in result set with)
-    private $groupDistinct; // group-by count-distinct attribute
-    private $_maxmatches; // max matches to retrieve
-    private $_cutoff; // cutoff to stop searching at (default is 0)
-    private $_retrycount; // distributed retries count
-    private $retryDelay; // distributed retries delay
-    private $_anchor; // geographical anchor point
-    private $indexWeights; // per-index weights
-    private $_ranker; // ranking mode (default is Ranker::PROXIMITY_BM25)
-    private $_rankexpr; // ranking mode expression (for Ranker::EXPR)
-    private $_maxquerytime; // max query time, milliseconds (default is 0, do not limit)
-    private $_fieldweights; // per-field-name weights
-    private $_overrides; // per-query attribute values overrides
-    private $_select; // select-list (attributes or expressions, with optional aliases)
-    private $_error; // last error message
-    private $_warning; // last warning message
-    private $_connerror; // connection error vs remote error flag
-    private $_reqs; // requests array for multi-query
-    private $_mbenc; // stored mbstring encoding
-    private $arrayResult; // whether $result["matches"] should be a hash or an array
-    private $_timeout; // connect timeout
-    private $_path;
-    private $_socket;
+    /**
+     * Searchd host (default is "localhost")
+     *
+     * @var string
+     */
+    private $host = 'localhost';
+
+    /**
+     * Searchd port (default is 9312)
+     *
+     * @var int
+     */
+    private $port = 9321;
+
+    /**
+     * How many records to seek from result-set start (default is 0)
+     *
+     * @var int
+     */
+    private $offset = 0;
+
+    /**
+     * How many records to return from result-set starting at offset (default is 20)
+     *
+     * @var int
+     */
+    private $limit = 20;
+
+    /**
+     * Query matching mode (default is Matcher::ALL)
+     *
+     * @var int
+     */
+    private $mode = Matcher::ALL;
+
+    /**
+     * Per-field weights (default is 1 for all fields)
+     *
+     * @var array
+     */
+    private $weights = array();
+
+    /**
+     * @var int
+     */
+    private $sort; // match sorting mode (default is Sorter::RELEVANCE)
+
+    /**
+     * Attribute to sort by (default is "")
+     *
+     * @var string
+     */
+    private $sortBy = '';
+
+    /**
+     * Min ID to match (default is 0, which means no limit)
+     *
+     * @var int
+     */
+    private $minId = 0;
+
+    /**
+     * Max ID to match (default is 0, which means no limit)
+     *
+     * @var int
+     */
+    private $maxId = 0;
+
+    /**
+     * @var array
+     */
+    private $filters = array(); // search filters
+
+    /**
+     * Group-by attribute name
+     *
+     * @var string
+     */
+    private $groupBy;
+
+    /**
+     * Group-by function (to pre-process group-by attribute value with)
+     *
+     * @var int
+     */
+    private $groupFunc;
+
+    /**
+     * Group-by sorting clause (to sort groups in result set with)
+     *
+     * @var string
+     */
+    private $groupSort;
+
+    /**
+     * Group-by count-distinct attribute
+     *
+     * @var string
+     */
+    private $groupDistinct;
+
+    /**
+     * Max matches to retrieve
+     *
+     * @var int
+     */
+    private $maxMatches;
+
+    /**
+     * Cutoff to stop searching at (default is 0)
+     *
+     * @var int
+     */
+    private $cutOff = 0;
+
+    /**
+     * Distributed retries count
+     *
+     * @var int
+     */
+    private $retryCount;
+
+    /**
+     * Distributed retries delay
+     *
+     * @var int
+     */
+    private $retryDelay;
+
+    /**
+     * Geographical anchor point
+     *
+     * @var array
+     */
+    private $anchor;
+
+    /**
+     * Per-index weights
+     *
+     * @var array
+     */
+    private $indexWeights;
+
+    /**
+     * Ranking mode (default is Ranker::PROXIMITY_BM25)
+     *
+     * @var int
+     */
+    private $ranker = Ranker::PROXIMITY_BM25;
+
+    /**
+     * Ranking mode expression (for Ranker::EXPR)
+     *
+     * @var string
+     */
+    private $rankExpr;
+
+    /**
+     * Max query time, milliseconds (default is 0, do not limit)
+     *
+     * @var int
+     */
+    private $maxQueryTime = 0;
+
+    /**
+     * Per-field-name weights
+     *
+     * @var array
+     */
+    private $fieldWeights;
+
+    /**
+     * Per-query attribute values overrides
+     *
+     * @var array
+     */
+    private $overrides;
+
+    /**
+     * Select-list (attributes or expressions, with optional aliases)
+     *
+     * @var string
+     */
+    private $select = '';
+
+    /**
+     * Last error message
+     *
+     * @var string
+     */
+    private $error;
+
+    /**
+     * Last warning message
+     *
+     * @var string
+     */
+    private $warning = '';
+
+    /**
+     * Connection error vs remote error flag
+     *
+     * @var bool
+     */
+    private $connectionError;
+
+    /**
+     * Requests array for multi-query
+     *
+     * @var array
+     */
+    private $requests = array();
+
+    /**
+     * Stored mbstring encoding
+     *
+     * @var string
+     */
+    private $mbstringEncoding;
+
+    /**
+     *  Whether $result["matches"] should be a hash or an array
+     *
+     * @var bool
+     */
+    private $arrayResult;
+
+    /**
+     * Connect timeout
+     *
+     * @var int
+     */
+    private $timeout;
+
+    /**
+     * @var bool
+     */
+    private $path;
+
+    /**
+     * @var bool
+     */
+    private $socket;
 
     /**
      * @var Packer
@@ -80,67 +289,81 @@ class SphinxClient
     private $multiByte;
 
     /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @var Attribute
+     */
+    private $queryAttribute;
+
+    /**
+     * @var Response
+     */
+    private $response;
+
+    /**
      * Creates a new client object and fill defaults
      */
     public function __construct()
     {
+        $this->connection = new Connection();
         $this->packer = new Packer();
         $this->multiByte = new MultiByte();
 
+        $this->response = new Response($this->connection, $this->packer, $this->multiByte);
+
+        $this->sorter = new Sorter();
+        $this->matcher = new Matcher();
+        $this->queryGroupBy = new GroupBy();
+        $this->queryAttribute = new Attribute();
+
+
         // Per-client-object settings
-        $this->host = "localhost";
-        $this->port = 9312;
-        $this->_path = false;
-        $this->_socket = false;
+        $this->path = false;
+        $this->socket = false;
 
-        // Per-query settings
-        $this->offset = 0;
-        $this->_limit = 20;
 
-        $this->_mode = Matcher::ALL;
 
-        $this->_weights = array();
-        $this->_fieldweights = array();
-        $this->indexWeights = array();
-
-        $this->_sort = Sorter::RELEVANCE;
+        $this->sort = Sorter::RELEVANCE;
         $this->sortBy = "";
 
-        $this->_min_id = 0;
-        $this->_max_id = 0;
+        $this->minId = 0;
+        $this->maxId = 0;
 
-        $this->_filters = array();
+        $this->filters = array();
 
         $this->groupBy = "";
         $this->groupFunc = GroupBy::DAY;
         $this->groupSort = "@group desc";
 
         $this->groupDistinct = "";
-        $this->_maxmatches = 1000;
-        $this->_cutoff = 0;
-        $this->_retrycount = 0;
+        $this->maxMatches = 1000;
+        $this->cutOff = 0;
+        $this->retryCount = 0;
         $this->retryDelay = 0;
-        $this->_anchor = array();
+        $this->anchor = array();
 
 
-        $this->_ranker = Ranker::PROXIMITY_BM25;
-        $this->_rankexpr = "";
+        $this->ranker = Ranker::PROXIMITY_BM25;
+        $this->rankExpr = "";
 
-        $this->_maxquerytime = 0;
+        $this->maxQueryTime = 0;
 
-        $this->_overrides = array();
-        $this->_select = "*";
+        $this->overrides = array();
+        $this->select = "*";
 
         // Per-reply fields (for single-query case)
-        $this->_error = "";
-        $this->_warning = "";
-        $this->_connerror = false;
+        $this->error = "";
+        $this->warning = "";
+        $this->connectionError = false;
 
         // Requests storage (for multi-query case)
-        $this->_reqs = array();
-        $this->_mbenc = "";
+        $this->requests = array();
+        $this->mbstringEncoding = "";
         $this->arrayResult = false;
-        $this->_timeout = 0;
+        $this->timeout = 0;
     }
 
     /**
@@ -148,8 +371,8 @@ class SphinxClient
      */
     public function __destruct()
     {
-        if ($this->_socket !== false) {
-            fclose($this->_socket);
+        if ($this->socket !== false) {
+            fclose($this->socket);
         }
     }
 
@@ -160,7 +383,7 @@ class SphinxClient
      */
     public function getLastError()
     {
-        return $this->_error;
+        return $this->error;
     }
 
     /**
@@ -170,7 +393,7 @@ class SphinxClient
      */
     public function getLastWarning()
     {
-        return $this->_warning;
+        return $this->warning;
     }
 
     /**
@@ -180,7 +403,7 @@ class SphinxClient
      */
     public function isConnectError()
     {
-        return $this->_connerror;
+        return $this->connectionError;
     }
 
     /**
@@ -192,19 +415,22 @@ class SphinxClient
      */
     public function setServer($host, $port = 0)
     {
-        assert(is_string($host));
+        $host = (string) $host;
+        $port = (int) $port;
+
         if ($host[0] == '/') {
-            $this->_path = 'unix://' . $host;
-        }
-        if (substr($host, 0, 7) == "unix://") {
-            $this->_path = $host;
+            $this->path = 'unix://' . $host;
         }
 
-        $this->host = $host;
-        if (is_int($port))
-            if ($port)
-                $this->port = $port;
-        $this->_path = '';
+        if (substr($host, 0, 7) == "unix://") {
+            $this->path = $host;
+        }
+
+        if ($port) {
+            $this->port = $port;
+        }
+
+        $this->path = '';
 
         return $this;
     }
@@ -217,9 +443,8 @@ class SphinxClient
      */
     public function setConnectTimeout($timeout)
     {
-        assert(is_int($timeout));
         assert($timeout >= 0);
-        $this->_timeout = $timeout;
+        $this->timeout = (int) $timeout;
 
         return $this;
     }
@@ -235,21 +460,21 @@ class SphinxClient
      */
     public function setLimits($offset, $limit, $max = 0, $cutoff = 0)
     {
-        assert(is_int($offset));
-        assert(is_int($limit));
-        assert(is_int($max));
-        assert(is_int($cutoff));
         assert($offset >= 0);
         assert($limit > 0);
         assert($max >= 0);
         assert($cutoff >= 0);
 
-        $this->offset = $offset;
-        $this->_limit = $limit;
-        if ($max > 0)
-            $this->_maxmatches = $max;
-        if ($cutoff > 0)
-            $this->_cutoff = $cutoff;
+        $this->offset = (int)$offset;
+        $this->limit = (int)$limit;
+
+        if ($max > 0) {
+            $this->maxMatches = (int)$max;
+        }
+
+        if ($cutoff > 0) {
+            $this->cutOff = (int)$cutoff;
+        }
 
         return $this;
     }
@@ -262,9 +487,8 @@ class SphinxClient
      */
     public function setMaxQueryTime($max)
     {
-        assert(is_int($max));
         assert($max >= 0);
-        $this->_maxquerytime = $max;
+        $this->maxQueryTime = (int)$max;
 
         return $this;
     }
@@ -272,19 +496,18 @@ class SphinxClient
     /**
      * Sets a matching mode.
      *
-     * @param $mode
+     * @param int $mode
+     *
+     * @throws SphinxClientException
      * @return SphinxClient
      */
     public function setMatchMode($mode)
     {
-        assert($mode == Matcher::ALL
-            || $mode == Matcher::ANY
-            || $mode == Matcher::PHRASE
-            || $mode == Matcher::BOOLEAN
-            || $mode == Matcher::EXTENDED
-            || $mode == Matcher::FULLSCAN
-            || $mode == Matcher::EXTENDED2);
-        $this->_mode = $mode;
+        if (!$this->matcher->isValid($mode)) {
+            throw new SphinxClientException('Match mode is not valid');
+        }
+
+        $this->mode = (int) $mode;
 
         return $this;
     }
@@ -293,15 +516,15 @@ class SphinxClient
      * Sets ranking mode.
      *
      * @param $ranker
-     * @param  string $rankexpr
+     * @param  string $rankExpr
      * @return SphinxClient
      */
-    public function setRankingMode($ranker, $rankexpr = "")
+    public function setRankingMode($ranker, $rankExpr = "")
     {
         assert($ranker === 0 || $ranker >= 1 && $ranker < Ranker::TOTAL);
-        assert(is_string($rankexpr));
-        $this->_ranker = $ranker;
-        $this->_rankexpr = $rankexpr;
+
+        $this->ranker = (int) $ranker;
+        $this->rankExpr = (string) $rankExpr;
 
         return $this;
     }
@@ -311,92 +534,38 @@ class SphinxClient
      *
      * @param $mode
      * @param  string $sortby
+     *
+     * @throws SphinxClientException
      * @return SphinxClient
      */
     public function setSortMode($mode, $sortby = "")
     {
-        settype($mode, 'integer'); //If mode is not integer, defaults to Sorter::RELEVANCE.
+        if (!$this->sorter->isValid($mode)) {
+            throw new SphinxClientException('Sorting mode is not valid');
+        }
 
-        assert(
-            $mode == Sorter::RELEVANCE ||
-            $mode == Sorter::ATTR_DESC ||
-            $mode == Sorter::ATTR_ASC ||
-            $mode == Sorter::TIME_SEGMENTS ||
-            $mode == Sorter::EXTENDED ||
-            $mode == Sorter::EXPR);
-
-        assert(is_string($sortby));
         assert($mode == Sorter::RELEVANCE || strlen($sortby) > 0);
 
-        $this->_sort = $mode;
-        $this->sortBy = $sortby;
+        $this->sort = (int)$mode;
+        $this->sortBy = (string)$sortby;
 
         return $this;
     }
 
-    /**
-     * DEPRECATED; Throws exception. Use SetFieldWeights() instead.
-     *
-     * @param  array $weights
-     * @throws \Exception
-     */
-    public function setWeights(array $weights)
-    {
-        unset($weights);
-        throw new \Exception("setWeights method is deprecated. Use SetFieldWeights() instead.");
-
-    }
-
-    /**
-     * Bind per-field weights by name.
-     *
-     * @param $weights
-     * @return SphinxClient
-     */
-    public function setFieldWeights(array $weights)
-    {
-        assert(is_array($weights));
-        foreach ($weights as $name => $weight) {
-            assert(is_string($name));
-            assert(is_int($weight));
-        }
-        $this->_fieldweights = $weights;
-
-        return $this;
-    }
-
-    /**
-     * Bind per-index weights by name.
-     *
-     * @param  array $weights
-     * @return SphinxClient
-     */
-    public function setIndexWeights(array $weights)
-    {
-        assert(is_array($weights));
-        foreach ($weights as $index => $weight) {
-            assert(is_string($index));
-            assert(is_int($weight));
-        }
-        $this->indexWeights = $weights;
-
-        return $this;
-    }
 
     /**
      * Set IDs range to match. Only match records if document ID is between $min and $max (inclusive)
      *
-     * @param $min
-     * @param $max
-     * @return SphinxClient
+     * @param int $min
+     * @param int $max
+     * @return $this
      */
     public function setIDRange($min, $max)
     {
-        assert(is_numeric($min));
-        assert(is_numeric($max));
         assert($min <= $max);
-        $this->_min_id = $min;
-        $this->_max_id = $max;
+
+        $this->minId = (int)$min;
+        $this->maxId = (int)$max;
 
         return $this;
     }
@@ -411,19 +580,19 @@ class SphinxClient
      */
     public function setFilter($attribute, array $values, $exclude = false)
     {
-        assert(is_string($attribute));
-        assert(is_array($values));
         assert(count($values));
 
         $exclude = $this->convertToBoolean($exclude);
 
         if (is_array($values) && count($values)) {
-            foreach ($values as $value)
-                assert(is_numeric($value));
 
-            $this->_filters[] = array(
+            foreach ($values as $value) {
+                assert(is_numeric($value));
+            }
+
+            $this->filters[] = array(
                 "type" => Filter::VALUES,
-                "attr" => $attribute,
+                "attr" => (string)$attribute,
                 "exclude" => $exclude,
                 "values" => $values
             );
@@ -432,21 +601,48 @@ class SphinxClient
         return $this;
     }
 
+    /**
+     * @author: Nil Portugués Calderó
+     * Converts values to its boolean representation.
+     *
+     * @param $exclude
+     * @return bool
+     */
+    private function convertToBoolean($exclude)
+    {
+        if (is_numeric($exclude) && ($exclude == 0 || $exclude == 1)) {
+            settype($exclude, 'boolean');
+        } elseif (
+            $exclude === true
+            || $exclude === false
+            || strtolower(trim($exclude)) === 'true'
+            || strtolower(trim($exclude)) === 'false'
+        ) {
+            settype($exclude, 'boolean');
+        } else {
+            $exclude = false;
+        }
+
+        return $exclude;
+    }
+
+    /**
+     * @param $attribute
+     * @param $min
+     * @param $max
+     * @param bool $exclude
+     * @return $this
+     */
     public function setFilterRange($attribute, $min, $max, $exclude = false)
     {
-        assert(is_string($attribute));
-        assert(is_numeric($min));
-        assert(is_numeric($max));
         assert($min <= $max);
 
-        $exclude = $this->convertToBoolean($exclude);
-
-        $this->_filters[] = array(
+        $this->filters[] = array(
             "type" => Filter::RANGE,
-            "attr" => $attribute,
-            "exclude" => $exclude,
-            "min" => $min,
-            "max" => $max
+            "attr" => (string)$attribute,
+            "min" => (int)$min,
+            "max" => (int)$max,
+            "exclude" => $this->convertToBoolean($exclude)
         );
 
         return $this;
@@ -463,26 +659,22 @@ class SphinxClient
      */
     public function setFilterFloatRange($attribute, $min, $max, $exclude = false)
     {
-        assert(is_string($attribute));
-        assert(is_float($min));
-        assert(is_float($max));
         assert($min <= $max);
 
-        $exclude = $this->convertToBoolean($exclude);
-
-        $this->_filters[] = array(
+        $this->filters[] = array(
             "type" => Filter::FLOATRANGE,
-            "attr" => $attribute,
-            "exclude" => $exclude,
-            "min" => $min,
-            "max" => $max
+            "attr" => (string)$attribute,
+            "min" => (float)$min,
+            "max" => (float)$max,
+            "exclude" => $this->convertToBoolean($exclude)
         );
 
         return $this;
     }
 
     /**
-     * Set ups anchor point for geosphere distance calculations required to use @geodist in filters and sorting latitude and longitude must be in radians.
+     * Set ups anchor point for geosphere distance calculations required
+     * to use @geodist in filters and sorting latitude and longitude must be in radians.
      *
      * @param $attrlat
      * @param $attrlong
@@ -492,12 +684,13 @@ class SphinxClient
      */
     public function setGeoAnchor($attrlat, $attrlong, $lat, $long)
     {
-        assert(is_string($attrlat));
-        assert(is_string($attrlong));
-        assert(is_float($lat));
-        assert(is_float($long));
 
-        $this->_anchor = array("attrlat" => $attrlat, "attrlong" => $attrlong, "lat" => $lat, "long" => $long);
+        $this->anchor = array(
+            "attrlat" => (string)$attrlat,
+            "attrlong" => (string)$attrlong,
+            "lat" => (float)$lat,
+            "long" => (float)$long
+        );
 
         return $this;
     }
@@ -508,25 +701,23 @@ class SphinxClient
      * @param $attribute
      * @param $func
      * @param  string $groupsort
+     *
+     * @throws SphinxClientException
      * @return SphinxClient
      */
     public function setGroupBy($attribute, $func, $groupsort = "@group desc")
     {
-        assert(is_string($attribute));
-        assert(is_string($groupsort));
-        assert($func == GroupBy::DAY
-            || $func == GroupBy::WEEK
-            || $func == GroupBy::MONTH
-            || $func == GroupBy::YEAR
-            || $func == GroupBy::ATTR
-            || $func == GroupBy::ATTRPAIR);
+        if (!$this->queryGroupBy->isValid($func)) {
+            throw new SphinxClientException('Group By function is not valid');
+        }
 
-        $this->groupBy = $attribute;
+        $this->groupBy = (string)$attribute;
+        $this->groupSort = (string)$groupsort;
         $this->groupFunc = $func;
-        $this->groupSort = $groupsort;
 
         return $this;
     }
+
 
     /**
      * Sets count-distinct attribute for group-by queries.
@@ -536,14 +727,10 @@ class SphinxClient
      */
     public function setGroupDistinct($attribute)
     {
-        assert(is_string($attribute));
-        $this->groupDistinct = $attribute;
+        $this->groupDistinct = (string)$attribute;
 
         return $this;
     }
-
-    /// set range filter
-    /// only match records if $attribute value is beetwen $min and $max (inclusive)
 
     /**
      * Sets distributed retries count and delay values.
@@ -554,10 +741,11 @@ class SphinxClient
      */
     public function setRetries($count, $delay = 0)
     {
-        assert(is_int($count) && $count >= 0);
-        assert(is_int($delay) && $delay >= 0);
-        $this->_retrycount = (int) $count;
-        $this->retryDelay = (int) $delay;
+        assert($count >= 0);
+        assert($delay >= 0);
+
+        $this->retryCount = (int)$count;
+        $this->retryDelay = (int)$delay;
 
         return $this;
     }
@@ -571,8 +759,7 @@ class SphinxClient
      */
     public function setArrayResult($arrayResult)
     {
-        assert(is_bool($arrayResult));
-        $this->arrayResult = (bool) $arrayResult;
+        $this->arrayResult = (bool)$arrayResult;
 
         return $this;
     }
@@ -581,26 +768,25 @@ class SphinxClient
      * Overrides set attribute values. Attributes can be overridden one by one.
      * $values must be a hash that maps document IDs to attribute values.
      *
-     * @param $attrname
-     * @param $attrtype
-     * @param $values
+     * @param $attributeName
+     * @param $attributeType
+     * @param array $values
+     *
+     * @throws SphinxClientException
      * @return SphinxClient
      */
-    public function setOverride($attrname, $attrtype, $values)
+    public function setOverride($attributeName, $attributeType, array $values)
     {
-        assert(is_string($attrname));
-        assert(in_array($attrtype, array(
-            Attribute::INTEGER,
-            Attribute::TIMESTAMP,
-            Attribute::BOOL,
-            Attribute::FLOAT,
-            Attribute::BIGINT
-        )));
-        assert(is_array($values));
+        $attributeType = (int) $attributeType;
+        $attributeName = (string) $attributeName;
 
-        $this->_overrides[$attrname] = array(
-            "attr" => $attrname,
-            "type" => $attrtype,
+        if (!$this->queryAttribute->isValid($attributeType)) {
+            throw new SphinxClientException('Attribute is not valid');
+        }
+
+        $this->overrides[$attributeName] = array(
+            "attr" => $attributeName,
+            "type" => $attributeType,
             "values" => $values
         );
 
@@ -615,8 +801,7 @@ class SphinxClient
      */
     public function setSelect($select)
     {
-        assert(is_string($select));
-        $this->_select = $select;
+        $this->select = (string) $select;
 
         return $this;
     }
@@ -628,8 +813,8 @@ class SphinxClient
      */
     public function resetFilters()
     {
-        $this->_filters = array();
-        $this->_anchor = array();
+        $this->filters = array();
+        $this->anchor = array();
 
         return $this;
     }
@@ -656,13 +841,13 @@ class SphinxClient
      */
     public function resetOverrides()
     {
-        $this->_overrides = array();
+        $this->overrides = array();
 
         return $this;
     }
 
     /**
-     * Connects to searchd server, run given search query through given indexes, and returns the search results.
+     * connects to searchd server, run given search query through given indexes, and returns the search results.
      *
      * @param $query
      * @param  string $index
@@ -671,17 +856,17 @@ class SphinxClient
      */
     public function query($query, $index = "*", $comment = "")
     {
-        assert(empty($this->_reqs));
+        assert(empty($this->requests));
 
         $this->AddQuery($query, $index, $comment);
         $results = $this->RunQueries();
-        $this->_reqs = array(); // just in case it failed too early
+        $this->requests = array(); // just in case it failed too early
 
         if (!is_array($results))
             return false; // probably network error; error message should be already filled
 
-        $this->_error = $results[0]["error"];
-        $this->_warning = $results[0]["warning"];
+        $this->error = $results[0]["error"];
+        $this->warning = $results[0]["warning"];
         if ($results[0]["status"] == Status::ERROR)
             return false;
         else
@@ -702,24 +887,24 @@ class SphinxClient
         $this->multiByte->Push();
 
         // build request
-        $req = pack("NNNN", $this->offset, $this->_limit, $this->_mode, $this->_ranker);
-        if ($this->_ranker == Ranker::EXPR) {
-            $req .= pack("N", strlen($this->_rankexpr)) . $this->_rankexpr;
+        $req = pack("NNNN", $this->offset, $this->limit, $this->mode, $this->ranker);
+        if ($this->ranker == Ranker::EXPR) {
+            $req .= pack("N", strlen($this->rankExpr)) . $this->rankExpr;
         }
 
-        $req .= pack("N", $this->_sort); // (deprecated) sort mode
+        $req .= pack("N", $this->sort); // (deprecated) sort mode
         $req .= pack("N", strlen($this->sortBy)) . $this->sortBy;
         $req .= pack("N", strlen($query)) . $query; // query itself
-        $req .= pack("N", count($this->_weights)); // weights
-        foreach ($this->_weights as $weight)
+        $req .= pack("N", count($this->weights)); // weights
+        foreach ($this->weights as $weight)
             $req .= pack("N", (int)$weight);
         $req .= pack("N", strlen($index)) . $index; // indexes
         $req .= pack("N", 1); // id64 range marker
-        $req .= $this->packer->sphPackU64($this->_min_id) . $this->packer->sphPackU64($this->_max_id); // id64 range
+        $req .= $this->packer->sphPackU64($this->minId) . $this->packer->sphPackU64($this->maxId); // id64 range
 
         // filters
-        $req .= pack("N", count($this->_filters));
-        foreach ($this->_filters as $filter) {
+        $req .= pack("N", count($this->filters));
+        foreach ($this->filters as $filter) {
             $req .= pack("N", strlen($filter["attr"])) . $filter["attr"];
             $req .= pack("N", $filter["type"]);
             switch ($filter["type"]) {
@@ -745,16 +930,16 @@ class SphinxClient
 
         // group-by clause, max-matches count, group-sort clause, cutoff count
         $req .= pack("NN", $this->groupFunc, strlen($this->groupBy)) . $this->groupBy;
-        $req .= pack("N", $this->_maxmatches);
+        $req .= pack("N", $this->maxMatches);
         $req .= pack("N", strlen($this->groupSort)) . $this->groupSort;
-        $req .= pack("NNN", $this->_cutoff, $this->_retrycount, $this->retryDelay);
+        $req .= pack("NNN", $this->cutOff, $this->retryCount, $this->retryDelay);
         $req .= pack("N", strlen($this->groupDistinct)) . $this->groupDistinct;
 
         // anchor point
-        if (empty($this->_anchor)) {
+        if (empty($this->anchor)) {
             $req .= pack("N", 0);
         } else {
-            $a =& $this->_anchor;
+            $a =& $this->anchor;
             $req .= pack("N", 1);
             $req .= pack("N", strlen($a["attrlat"])) . $a["attrlat"];
             $req .= pack("N", strlen($a["attrlong"])) . $a["attrlong"];
@@ -767,19 +952,19 @@ class SphinxClient
             $req .= pack("N", strlen($idx)) . $idx . pack("N", $weight);
 
         // max query time
-        $req .= pack("N", $this->_maxquerytime);
+        $req .= pack("N", $this->maxQueryTime);
 
         // per-field weights
-        $req .= pack("N", count($this->_fieldweights));
-        foreach ($this->_fieldweights as $field => $weight)
+        $req .= pack("N", count($this->fieldWeights));
+        foreach ($this->fieldWeights as $field => $weight)
             $req .= pack("N", strlen($field)) . $field . pack("N", $weight);
 
         // comment
         $req .= pack("N", strlen($comment)) . $comment;
 
         // attribute overrides
-        $req .= pack("N", count($this->_overrides));
-        foreach ($this->_overrides as $entry) {
+        $req .= pack("N", count($this->overrides));
+        foreach ($this->overrides as $entry) {
             $req .= pack("N", strlen($entry["attr"])) . $entry["attr"];
             $req .= pack("NN", $entry["type"], count($entry["values"]));
             foreach ($entry["values"] as $id => $val) {
@@ -802,46 +987,44 @@ class SphinxClient
         }
 
         // select-list
-        $req .= pack("N", strlen($this->_select)) . $this->_select;
+        $req .= pack("N", strlen($this->select)) . $this->select;
 
         // mbstring workaround
         $this->multiByte->Pop();
 
         // store request to requests array
-        $this->_reqs[] = $req;
+        $this->requests[] = $req;
 
-        return count($this->_reqs) - 1;
+        return count($this->requests) - 1;
     }
 
     /**
-     * Connects to searchd, runs queries in batch, and returns an array of result sets.
+     * connects to searchd, runs queries in batch, and returns an array of result sets.
      *
      * @return array|bool
      */
     public function runQueries()
     {
-        if (empty($this->_reqs)) {
-            $this->_error = "no queries defined, issue AddQuery() first";
-
+        if (empty($this->requests)) {
+            $this->error = "no queries defined, issue AddQuery() first";
             return false;
         }
 
         // mbstring workaround
         $this->multiByte->Push();
 
-        if (!($fp = $this->_Connect())) {
+        if (!($fp = $this->connection->connect())) {
             $this->multiByte->Pop();
-
             return false;
         }
 
         // send query, get response
-        $nreqs = count($this->_reqs);
-        $req = join("", $this->_reqs);
+        $nreqs = count($this->requests);
+        $req = join("", $this->requests);
         $len = 8 + strlen($req);
         $req = pack("nnNNN", Command::SEARCH, Version::SEARCH, $len, 0, $nreqs) . $req; // add header
 
-        if (!($this->_Send($fp, $req, $len + 8)) ||
+        if (!($this->connection->send($fp, $req, $len + 8)) ||
             !($response = $this->_GetResponse($fp, Version::SEARCH))
         ) {
             $this->multiByte->Pop();
@@ -850,159 +1033,255 @@ class SphinxClient
         }
 
         // query sent ok; we can reset reqs now
-        $this->_reqs = array();
+        $this->requests = array();
 
         // parse and return response
         return $this->_ParseSearchResponse($response, $nreqs);
     }
 
     /**
-     * Connects to searchd server, and generate excerpts (snippets) of given documents for given query.
+     * Connects to Searchd server, and generate excerpts (snippets) of given documents for given query.
      * Returns false on failure, or an array of snippets on success.
      *
-     * @param $docs
+     * @param array $docs
      * @param $index
      * @param $words
-     * @param  array $opts
-     * @return array|bool
+     * @param array $options
+     * @return array
      */
-    public function buildExcerpts($docs, $index, $words, $opts = array())
+    public function buildExcerpts(array $docs, $index, $words, array $options = array())
     {
-        assert(is_array($docs));
-        assert(is_string($index));
-        assert(is_string($words));
-        assert(is_array($opts));
+        $index = (string) $index;
+        $words = (string) $words;
 
         $this->multiByte->Push();
 
-        if (!($fp = $this->_Connect())) {
+        if (!($fp = $this->connection->connect())) {
             $this->multiByte->Pop();
-
-            return false;
+            return array();
         }
 
-        /////////////////
-        // fixup options
-        /////////////////
+        $defaultOptions = $this->defaultOptions();
+        $options = array_filter($options);
+        $options = $options + $defaultOptions;
 
-        if (!isset($opts["before_match"])) $opts["before_match"] = "<b>";
-        if (!isset($opts["after_match"])) $opts["after_match"] = "</b>";
-        if (!isset($opts["chunk_separator"])) $opts["chunk_separator"] = " ... ";
-        if (!isset($opts["limit"])) $opts["limit"] = 256;
-        if (!isset($opts["limit_passages"])) $opts["limit_passages"] = 0;
-        if (!isset($opts["limit_words"])) $opts["limit_words"] = 0;
-        if (!isset($opts["around"])) $opts["around"] = 5;
-        if (!isset($opts["exact_phrase"])) $opts["exact_phrase"] = false;
-        if (!isset($opts["single_passage"])) $opts["single_passage"] = false;
-        if (!isset($opts["use_boundaries"])) $opts["use_boundaries"] = false;
-        if (!isset($opts["weight_order"])) $opts["weight_order"] = false;
-        if (!isset($opts["query_mode"])) $opts["query_mode"] = false;
-        if (!isset($opts["force_all_words"])) $opts["force_all_words"] = false;
-        if (!isset($opts["start_passage_id"])) $opts["start_passage_id"] = 1;
-        if (!isset($opts["load_files"])) $opts["load_files"] = false;
-        if (!isset($opts["html_strip_mode"])) $opts["html_strip_mode"] = "index";
-        if (!isset($opts["allow_empty"])) $opts["allow_empty"] = false;
-        if (!isset($opts["passage_boundary"])) $opts["passage_boundary"] = "none";
-        if (!isset($opts["emit_zones"])) $opts["emit_zones"] = false;
-        if (!isset($opts["load_files_scattered"])) $opts["load_files_scattered"] = false;
+        $requestBody = $this->buildRequestFlags($options)
+            . $this->buildRequestIndex($index)
+            . $this->buildRequestWords($words)
+            . $this->buildRequestOptions($options)
+            . $this->buildRequestDocuments($docs);
 
-        /////////////////
-        // build request
-        /////////////////
+        $requestMessage = $this->buildRequest($requestBody);
 
-        // v.1.2 req
-        $flags = 1; // remove spaces
-        if ($opts["exact_phrase"]) $flags |= 2;
-        if ($opts["single_passage"]) $flags |= 4;
-        if ($opts["use_boundaries"]) $flags |= 8;
-        if ($opts["weight_order"]) $flags |= 16;
-        if ($opts["query_mode"]) $flags |= 32;
-        if ($opts["force_all_words"]) $flags |= 64;
-        if ($opts["load_files"]) $flags |= 128;
-        if ($opts["allow_empty"]) $flags |= 256;
-        if ($opts["emit_zones"]) $flags |= 512;
-        if ($opts["load_files_scattered"]) $flags |= 1024;
-        $req = pack("NN", 0, $flags); // mode=0, flags=$flags
-        $req .= pack("N", strlen($index)) . $index; // req index
-        $req .= pack("N", strlen($words)) . $words; // req words
-
-        // options
-        $req .= pack("N", strlen($opts["before_match"])) . $opts["before_match"];
-        $req .= pack("N", strlen($opts["after_match"])) . $opts["after_match"];
-        $req .= pack("N", strlen($opts["chunk_separator"])) . $opts["chunk_separator"];
-        $req .= pack("NN", (int)$opts["limit"], (int)$opts["around"]);
-        $req .= pack("NNN", (int)$opts["limit_passages"], (int)$opts["limit_words"], (int)$opts["start_passage_id"]); // v.1.2
-        $req .= pack("N", strlen($opts["html_strip_mode"])) . $opts["html_strip_mode"];
-        $req .= pack("N", strlen($opts["passage_boundary"])) . $opts["passage_boundary"];
-
-        // documents
-        $req .= pack("N", count($docs));
-        foreach ($docs as $doc) {
-            assert(is_string($doc));
-            $req .= pack("N", strlen($doc)) . $doc;
-        }
-
-        ////////////////////////////
-        // send query, get response
-        ////////////////////////////
-
-        $len = strlen($req);
-        $req = pack("nnN", Command::EXCERPT, Version::EXCERPT, $len) . $req; // add header
-        if (!($this->_Send($fp, $req, $len + 8)) ||
-            !($response = $this->_GetResponse($fp, Version::EXCERPT))
+        if (!($this->connection->send($fp, $requestMessage, strlen($requestBody) + 8)) ||
+            !($response = $this->response->getResponse($fp, Version::EXCERPT))
         ) {
             $this->multiByte->Pop();
-
-            return false;
+            return array();
         }
 
-        //////////////////
-        // parse response
-        //////////////////
+        return $this->parseRequestResponse($response, $docs);
+    }
 
+    /**
+     * @return array
+     */
+    private function defaultOptions()
+    {
+        return array(
+            "before_match" => "<b>",
+            "after_match" => "</b>",
+            "chunk_separator" => " ... ",
+            "limit" => 256,
+            "limit_passages" => 0,
+            "limit_words" => 0,
+            "around" => 5,
+            "exact_phrase" => false,
+            "single_passage" => false,
+            "use_boundaries" => false,
+            "weight_order" => false,
+            "query_mode" => false,
+            "force_all_words" => false,
+            "start_passage_id" => 1,
+            "load_files" => false,
+            "html_strip_mode" => "index",
+            "allow_empty" => false,
+            "passage_boundary" => "none",
+            "emit_zones" => false,
+            "load_files_scattered" => false,
+        );
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    private function buildRequestFlags(array &$options)
+    {
+        $flags = 1;
+        $optionKeys = array_keys($options);
+
+        foreach ($optionKeys as $keyName) {
+            switch ($keyName) {
+                case "exact_phrase":
+                    $flags |= 2;
+                    break;
+                case "single_passage":
+                    $flags |= 4;
+                    break;
+                case "use_boundaries":
+                    $flags |= 8;
+                    break;
+                case "weight_order":
+                    $flags |= 16;
+                    break;
+                case "query_mode":
+                    $flags |= 32;
+                    break;
+                case "force_all_words":
+                    $flags |= 64;
+                    break;
+                case "load_files":
+                    $flags |= 128;
+                    break;
+                case "allow_empty":
+                    $flags |= 256;
+                    break;
+                case "emit_zones":
+                    $flags |= 512;
+                    break;
+                case "load_files_scattered":
+                    $flags |= 1024;
+                    break;
+            }
+        }
+
+        $request = pack("NN", 0, $flags); // mode=0, flags=$flags
+
+        return $request;
+    }
+
+    /**
+     * @param $index
+     * @return string
+     */
+    private function buildRequestIndex($index)
+    {
+        return pack("N", strlen($index)) . $index;
+    }
+
+    /**
+     * @param $words
+     * @return string
+     */
+    private function buildRequestWords($words)
+    {
+        return pack("N", strlen($words)) . $words;
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    private function buildRequestOptions(array &$options)
+    {
+        $options["limit"] = (int)$options["limit"];
+        $options["around"] = (int)$options["around"];
+        $options["limit_passages"] = (int)$options["limit_passages"];
+        $options["limit_words"] = (int)$options["limit_words"];
+        $options["start_passage_id"] = (int)$options["start_passage_id"];
+
+        $request = pack("N", strlen($options["before_match"]))
+            . $options["before_match"]
+            . pack("N", strlen($options["after_match"]))
+            . $options["after_match"]
+            . pack("N", strlen($options["chunk_separator"]))
+            . $options["chunk_separator"]
+            . pack("NN", $options["limit"], $options["around"])
+            . pack("NNN", $options["limit_passages"], $options["limit_words"], $options["start_passage_id"])
+            . $options["html_strip_mode"]
+            . pack("N", strlen($options["passage_boundary"]))
+            . $options["passage_boundary"];
+
+        return $request;
+    }
+
+    /**
+     * @param $docs
+     * @return string
+     */
+    private function buildRequestDocuments($docs)
+    {
+        $request = '';
+        pack("N", count($docs));
+
+        foreach ($docs as $doc) {
+            assert(is_string($doc));
+            $request .= pack("N", strlen($doc)) . $doc;
+        }
+        return $request;
+    }
+
+    /**
+     * @param $requestBody
+     * @return string
+     */
+    private function buildRequest($requestBody)
+    {
+        $messageLength = strlen($requestBody);
+        return pack("nnN", Command::EXCERPT, Version::EXCERPT, $messageLength) . $requestBody;
+    }
+
+    /**
+     * @param $response
+     * @param $docs
+     * @return array
+     */
+    private function parseRequestResponse($response, $docs)
+    {
         $pos = 0;
         $res = array();
         $rlen = strlen($response);
+
         for ($i = 0; $i < count($docs); $i++) {
             list(, $len) = unpack("N*", substr($response, $pos, 4));
             $pos += 4;
 
             if ($pos + $len > $rlen) {
-                $this->_error = "incomplete reply";
-                $this->multiByte->Pop();
-
-                return false;
+                $this->error = "incomplete reply";
+                $this->multiByte->pop();
+                return array();
             }
+
             $res[] = $len ? substr($response, $pos, $len) : "";
             $pos += $len;
         }
 
-        $this->multiByte->Pop();
+        $this->multiByte->pop();
 
         return $res;
     }
 
     /**
-     * Connects to searchd server, and generates a keyword list for a given query.
+     * connects to searchd server, and generates a keyword list for a given query.
      * Returns false on failure or an array of words on success.
      *
      * @param $query
      * @param $index
      * @param $hits
-     * @return array|bool
+     * @return array
      */
     public function buildKeywords($query, $index, $hits)
     {
-        assert(is_string($query));
-        assert(is_string($index));
-        assert(is_bool($hits));
+        $query = (string) $query;
+        $index = (string) $index;
+        $hits = (bool) $hits;
 
-        $this->multiByte->Push();
+        $this->multiByte->push();
 
-        if (!($fp = $this->_Connect())) {
-            $this->multiByte->Pop();
-
-            return false;
+        if (!($fp = $this->connection->connect())) {
+            $this->multiByte->pop();
+            return array();
         }
 
         /////////////////
@@ -1020,12 +1299,12 @@ class SphinxClient
 
         $len = strlen($req);
         $req = pack("nnN", Command::KEYWORDS, Version::KEYWORDS, $len) . $req; // add header
-        if (!($this->_Send($fp, $req, $len + 8)) ||
+        if (!($this->connection->send($fp, $req, $len + 8)) ||
             !($response = $this->_GetResponse($fp, Version::KEYWORDS))
         ) {
             $this->multiByte->Pop();
 
-            return false;
+            return array();
         }
 
         //////////////////
@@ -1034,17 +1313,23 @@ class SphinxClient
 
         $pos = 0;
         $res = array();
+
         $rlen = strlen($response);
         list(, $nwords) = unpack("N*", substr($response, $pos, 4));
+
         $pos += 4;
+
         for ($i = 0; $i < $nwords; $i++) {
+
             list(, $len) = unpack("N*", substr($response, $pos, 4));
             $pos += 4;
+
             $tokenized = $len ? substr($response, $pos, $len) : "";
             $pos += $len;
 
             list(, $len) = unpack("N*", substr($response, $pos, 4));
             $pos += 4;
+
             $normalized = $len ? substr($response, $pos, $len) : "";
             $pos += $len;
 
@@ -1058,14 +1343,14 @@ class SphinxClient
             }
 
             if ($pos > $rlen) {
-                $this->_error = "incomplete reply";
-                $this->multiByte->Pop();
 
-                return false;
+                $this->error = "incomplete reply";
+                $this->multiByte->pop();
+                return array();
             }
         }
 
-        $this->multiByte->Pop();
+        $this->multiByte->pop();
 
         return $res;
     }
@@ -1089,168 +1374,92 @@ class SphinxClient
      * Returns the amount of updated documents (0 or more) on success, or -1 on failure.
      *
      * @param $index
-     * @param  array $attrs
+     * @param  array $attributes
      * @param  array $values
      * @param  bool $mva
      * @return int
      */
-    public function updateAttributes($index, array $attrs, array $values, $mva = false)
+    public function updateAttributes($index, array $attributes, array $values, $mva = false)
     {
-        // verify everything
-        assert(is_string($index));
-        assert(is_bool($mva));
+        $mva = (bool)$mva;
+        $index = (string)$index;
 
-        assert(is_array($attrs));
-        foreach ($attrs as $attr)
-            assert(is_string($attr));
+
+        assert(is_array($attributes));
+        foreach ($attributes as $attribute) {
+            assert(is_string($attribute));
+        }
 
         assert(is_array($values));
+
         foreach ($values as $id => $entry) {
+
             assert(is_numeric($id));
             assert(is_array($entry));
-            assert(count($entry) == count($attrs));
+            assert(count($entry) == count($attributes));
+
             foreach ($entry as $v) {
                 if ($mva) {
                     assert(is_array($v));
-                    foreach ($v as $vv)
+                    foreach ($v as $vv) {
                         assert(is_int($vv));
-                } else
+                    }
+
+                } else {
                     assert(is_int($v));
+                }
             }
         }
 
         // build request
-        $this->multiByte->Push();
+        $this->multiByte->push();
         $req = pack("N", strlen($index)) . $index;
 
-        $req .= pack("N", count($attrs));
-        foreach ($attrs as $attr) {
-            $req .= pack("N", strlen($attr)) . $attr;
+        $req .= pack("N", count($attributes));
+        foreach ($attributes as $attribute) {
+            $req .= pack("N", strlen($attribute)) . $attribute;
             $req .= pack("N", $mva ? 1 : 0);
         }
 
         $req .= pack("N", count($values));
         foreach ($values as $id => $entry) {
+
             $req .= $this->packer->sphPackU64($id);
+
             foreach ($entry as $v) {
                 $req .= pack("N", $mva ? count($v) : $v);
-                if ($mva)
-                    foreach ($v as $vv)
+                if ($mva) {
+                    foreach ($v as $vv) {
                         $req .= pack("N", $vv);
+                    }
+                }
             }
         }
 
         // connect, send query, get response
-        if (!($fp = $this->_Connect())) {
-            $this->multiByte->Pop();
-
+        if (!($fp = $this->connection->connect())) {
+            $this->multiByte->pop();
             return -1;
         }
 
         $len = strlen($req);
         $req = pack("nnN", Command::UPDATE, Version::UPDATE, $len) . $req; // add header
-        if (!$this->_Send($fp, $req, $len + 8)) {
-            $this->multiByte->Pop();
 
+        if (!$this->connection->send($fp, $req, $len + 8)) {
+            $this->multiByte->pop();
             return -1;
         }
 
         if (!($response = $this->_GetResponse($fp, Version::UPDATE))) {
-            $this->multiByte->Pop();
-
+            $this->multiByte->pop();
             return -1;
         }
 
         // parse response
         list(, $updated) = unpack("N*", substr($response, 0, 4));
-        $this->multiByte->Pop();
+        $this->multiByte->pop();
 
         return $updated;
-    }
-
-    /**
-     * Opens the connection to searchd.
-     *
-     * @return bool
-     */
-    public function open()
-    {
-        if ($this->_socket !== false) {
-            $this->_error = 'already connected';
-
-            return false;
-        }
-        if (!$fp = $this->_Connect())
-            return false;
-
-        // command, command version = 0, body length = 4, body = 1
-        $req = pack("nnNN", Command::PERSIST, 0, 4, 1);
-        if (!$this->_Send($fp, $req, 12))
-            return false;
-
-        $this->_socket = $fp;
-
-        return true;
-    }
-
-    /**
-     * Closes the connection to searchd.
-     *
-     * @return bool
-     */
-    public function close()
-    {
-        if ($this->_socket === false) {
-            $this->_error = 'not connected';
-
-            return false;
-        }
-
-        fclose($this->_socket);
-        $this->_socket = false;
-
-        return true;
-    }
-
-    /**
-     * Checks the searchd status.
-     * @return array|bool
-     */
-    public function status()
-    {
-        $this->multiByte->Push();
-        if (!($fp = $this->_Connect())) {
-            $this->multiByte->Pop();
-
-            return false;
-        }
-
-        $req = pack("nnNN", Command::STATUS, Version::STATUS, 4, 1); // len=4, body=1
-        if (!($this->_Send($fp, $req, 12)) ||
-            !($response = $this->_GetResponse($fp, Version::STATUS))
-        ) {
-            $this->multiByte->Pop();
-
-            return false;
-        }
-
-        substr($response, 4); // just ignore length, error handling, etc
-        $p = 0;
-        list ($rows, $cols) = array_values(unpack("N*N*", substr($response, $p, 8)));
-        $p += 8;
-
-        $res = array();
-        for ($i = 0; $i < $rows; $i++)
-            for ($j = 0; $j < $cols; $j++) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $res[$i][] = substr($response, $p, $len);
-                $p += $len;
-            }
-
-        $this->multiByte->Pop();
-
-        return $res;
     }
 
     /**
@@ -1258,15 +1467,15 @@ class SphinxClient
      */
     public function flushAttributes()
     {
-        $this->multiByte->Push();
-        if (!($fp = $this->_Connect())) {
-            $this->multiByte->Pop();
+        $this->multiByte->push();
+        if (!($fp = $this->connection->connect())) {
+            $this->multiByte->pop();
 
             return -1;
         }
 
         $req = pack("nnN", Command::FLUSHATTRS, Version::FLUSHATTRS, 0); // len=0
-        if (!($this->_Send($fp, $req, 8)) ||
+        if (!($this->connection->send($fp, $req, 8)) ||
             !($response = $this->_GetResponse($fp, Version::FLUSHATTRS))
         ) {
             $this->multiByte->Pop();
@@ -1278,386 +1487,10 @@ class SphinxClient
         if (strlen($response) == 4)
             list(, $tag) = unpack("N*", $response);
         else
-            $this->_error = "unexpected response length";
+            $this->error = "unexpected response length";
 
-        $this->multiByte->Pop();
+        $this->multiByte->pop();
 
         return $tag;
-    }
-
-
-    /**
-     * @param $handle
-     * @param $data
-     * @param $length
-     * @return bool
-     */
-    private function _Send($handle, $data, $length)
-    {
-        if (feof($handle) || fwrite($handle, $data, $length) !== $length) {
-            $this->_error = 'connection unexpectedly closed (timed out?)';
-            $this->_connerror = true;
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Connect to searchd server
-     * @return bool|resource
-     */
-    private function _Connect()
-    {
-        if ($this->_socket !== false) {
-            // we are in persistent connection mode, so we have a socket
-            // however, need to check whether it's still alive
-            if (!@feof($this->_socket))
-                return $this->_socket;
-
-            // force reopen
-            $this->_socket = false;
-        }
-
-        $errno = 0;
-        $errstr = "";
-        $this->_connerror = false;
-
-        if ($this->_path) {
-            $host = $this->_path;
-            $port = 0;
-        } else {
-            $host = $this->host;
-            $port = $this->port;
-        }
-
-        if ($this->_timeout <= 0)
-            $fp = @fsockopen($host, $port, $errno, $errstr);
-        else
-            $fp = @fsockopen($host, $port, $errno, $errstr, $this->_timeout);
-
-        if (!$fp) {
-            if ($this->_path)
-                $location = $this->_path;
-            else
-                $location = "{$this->host}:{$this->port}";
-
-            $errstr = trim($errstr);
-            $this->_error = "connection to $location failed (errno=$errno, msg=$errstr)";
-            $this->_connerror = true;
-
-            return false;
-        }
-
-        // send my version
-        // this is a subtle part. we must do it before (!) reading back from searchd.
-        // because otherwise under some conditions (reported on FreeBSD for instance)
-        // TCP stack could throttle write-write-read pattern because of Nagle.
-        if (!$this->_Send($fp, pack("N", 1), 4)) {
-            fclose($fp);
-            $this->_error = "failed to send client protocol version";
-
-            return false;
-        }
-
-        // check version
-        list(, $v) = unpack("N*", fread($fp, 4));
-        $v = (int)$v;
-        if ($v < 1) {
-            fclose($fp);
-            $this->_error = "expected searchd protocol version 1+, got version '$v'";
-
-            return false;
-        }
-
-        return $fp;
-    }
-
-    /**
-     * Get and check response packet from searchd server.
-     *
-     * @param $fp
-     * @param $client_ver
-     * @return bool|string
-     */
-    private function _GetResponse($fp, $client_ver)
-    {
-        $status = '';
-        $response = "";
-        $len = 0;
-        $ver = '';
-
-        $header = fread($fp, 8);
-        if (strlen($header) == 8) {
-            list ($status, $ver, $len) = array_values(unpack("n2a/Nb", $header));
-            $left = $len;
-            while ($left > 0 && !feof($fp)) {
-                $chunk = fread($fp, min(8192, $left));
-                if ($chunk) {
-                    $response .= $chunk;
-                    $left -= strlen($chunk);
-                }
-            }
-        }
-        if ($this->_socket === false)
-            fclose($fp);
-
-        // check response
-        $read = strlen($response);
-        if (!$response || $read != $len) {
-            $this->_error = $len
-                ? "failed to read searchd response (status=$status, ver=$ver, len=$len, read=$read)"
-                : "received zero-sized searchd response";
-
-            return false;
-        }
-
-        // check status
-        if ($status == Status::WARNING) {
-            list($temp, $wlen) = unpack("N*", substr($response, 0, 4));
-            unset($temp);
-            $this->_warning = substr($response, 4, $wlen);
-
-            return substr($response, 4 + $wlen);
-        }
-        if ($status == Status::ERROR) {
-            $this->_error = "searchd error: " . substr($response, 4);
-
-            return false;
-        }
-        if ($status == Status::RETRY) {
-            $this->_error = "temporary searchd error: " . substr($response, 4);
-
-            return false;
-        }
-        if ($status != Status::OK) {
-            $this->_error = "unknown status code '$status'";
-
-            return false;
-        }
-
-        // check version
-        if ($ver < $client_ver) {
-            $this->_warning = sprintf("searchd command v.%d.%d older than client's v.%d.%d, some options might not work",
-                $ver >> 8, $ver & 0xff, $client_ver >> 8, $client_ver & 0xff);
-        }
-
-        return $response;
-    }
-
-
-    /**
-     * Helper function that parses and returns search query (or queries) response
-     * @param $response
-     * @param $nreqs
-     * @return array
-     */
-    private function _ParseSearchResponse($response, $nreqs)
-    {
-        $p = 0; // current position
-        $max = strlen($response); // max position for checks, to protect against broken responses
-
-        $results = array();
-        for ($ires = 0; $ires < $nreqs && $p < $max; $ires++) {
-            $results[] = array();
-            $result =& $results[$ires];
-
-            $result["error"] = "";
-            $result["warning"] = "";
-
-            // extract status
-            list(, $status) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
-            $result["status"] = $status;
-            if ($status != Status::OK) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $message = substr($response, $p, $len);
-                $p += $len;
-
-                if ($status == Status::WARNING) {
-                    $result["warning"] = $message;
-                } else {
-                    $result["error"] = $message;
-                    continue;
-                }
-            }
-
-            // read schema
-            $fields = array();
-            $attrs = array();
-
-            list(, $nfields) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
-            while ($nfields-- > 0 && $p < $max) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $fields[] = substr($response, $p, $len);
-                $p += $len;
-            }
-            $result["fields"] = $fields;
-
-            list(, $nattrs) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
-            while ($nattrs-- > 0 && $p < $max) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $attr = substr($response, $p, $len);
-                $p += $len;
-                list(, $type) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $attrs[$attr] = $type;
-            }
-            $result["attrs"] = $attrs;
-
-            // read match count
-            list(, $count) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
-            list(, $id64) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
-
-            // read matches
-            $idx = -1;
-            while ($count-- > 0 && $p < $max) {
-                // index into result array
-                $idx++;
-
-                // parse document id and weight
-                if ($id64) {
-                    $doc = $this->packer->sphUnpackU64(substr($response, $p, 8));
-                    $p += 8;
-                    list(, $weight) = unpack("N*", substr($response, $p, 4));
-                    $p += 4;
-                } else {
-                    list ($doc, $weight) = array_values(unpack("N*N*",
-                        substr($response, $p, 8)));
-                    $p += 8;
-                    $doc = $this->sphFixUint($doc);
-                }
-                $weight = sprintf("%u", $weight);
-
-                // create match entry
-                if ($this->arrayResult)
-                    $result["matches"][$idx] = array("id" => $doc, "weight" => $weight);
-                else
-                    $result["matches"][$doc]["weight"] = $weight;
-
-                // parse and create attributes
-                $attrvals = array();
-                foreach ($attrs as $attr => $type) {
-                    // handle 64bit ints
-                    if ($type == Attribute::BIGINT) {
-                        $attrvals[$attr] = $this->packer->sphUnpackI64(substr($response, $p, 8));
-                        $p += 8;
-                        continue;
-                    }
-
-                    // handle floats
-                    if ($type == Attribute::FLOAT) {
-                        list(, $uval) = unpack("N*", substr($response, $p, 4));
-                        $p += 4;
-                        list(, $fval) = unpack("f*", pack("L", $uval));
-                        $attrvals[$attr] = $fval;
-                        continue;
-                    }
-
-                    // handle everything else as unsigned ints
-                    list(, $val) = unpack("N*", substr($response, $p, 4));
-                    $p += 4;
-                    if ($type == Attribute::MULTI) {
-                        $attrvals[$attr] = array();
-                        $nvalues = $val;
-                        while ($nvalues-- > 0 && $p < $max) {
-                            list(, $val) = unpack("N*", substr($response, $p, 4));
-                            $p += 4;
-                            $attrvals[$attr][] = $this->sphFixUint($val);
-                        }
-                    } elseif ($type == Attribute::MULTI64) {
-                        $attrvals[$attr] = array();
-                        $nvalues = $val;
-                        while ($nvalues > 0 && $p < $max) {
-                            $attrvals[$attr][] = $this->packer->sphUnpackI64(substr($response, $p, 8));
-                            $p += 8;
-                            $nvalues -= 2;
-                        }
-                    } elseif ($type == Attribute::STRING) {
-                        $attrvals[$attr] = substr($response, $p, $val);
-                        $p += $val;
-                    } else {
-                        $attrvals[$attr] = $this->sphFixUint($val);
-                    }
-                }
-
-                if ($this->arrayResult)
-                    $result["matches"][$idx]["attrs"] = $attrvals;
-                else
-                    $result["matches"][$doc]["attrs"] = $attrvals;
-            }
-
-            list ($total, $total_found, $msecs, $words) =
-                array_values(unpack("N*N*N*N*", substr($response, $p, 16)));
-            $result["total"] = sprintf("%u", $total);
-            $result["total_found"] = sprintf("%u", $total_found);
-            $result["time"] = sprintf("%.3f", $msecs / 1000);
-            $p += 16;
-
-            while ($words-- > 0 && $p < $max) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $word = substr($response, $p, $len);
-                $p += $len;
-                list ($docs, $hits) = array_values(unpack("N*N*", substr($response, $p, 8)));
-                $p += 8;
-                $result["words"][$word] = array(
-                    "docs" => sprintf("%u", $docs),
-                    "hits" => sprintf("%u", $hits));
-            }
-        }
-
-        $this->multiByte->Pop();
-
-        return $results;
-    }
-
-    /**
-     * @param $value
-     * @return int|string
-     */
-    private function sphFixUint($value)
-    {
-        if (PHP_INT_SIZE >= 8) {
-            // x64 route, workaround broken unpack() in 5.2.2+
-            if ($value < 0) $value += (1 << 32);
-            return $value;
-        } else {
-            // x32 route, workaround php signed/unsigned brain damage
-            return sprintf("%u", $value);
-        }
-    }
-
-    /**
-     * @author: Nil Portugués Calderó
-     * Converts values to its boolean representation.
-     *
-     * @param $exclude
-     * @return bool
-     */
-    private function convertToBoolean($exclude)
-    {
-        if (is_numeric($exclude) && ($exclude == 0 || $exclude == 1)) {
-            settype($exclude, 'boolean');
-        } elseif (
-            $exclude === true
-            || $exclude === false
-            || strtolower(trim($exclude)) === 'true'
-            || strtolower(trim($exclude)) === 'false'
-        ) {
-            settype($exclude, 'boolean');
-        } else {
-            $exclude = false;
-        }
-
-        return $exclude;
     }
 }

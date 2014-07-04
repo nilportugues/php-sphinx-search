@@ -21,5 +21,18 @@ class Attribute
     const MULTI = 0x40000001;
     const MULTI64 = 0x40000002;
 
+    /**
+     * @param $type
+     * @return bool
+     */
+    public function isValid($type)
+    {
+        return ( $type === Attribute::INTEGER
+            || $type === Attribute::TIMESTAMP
+            || $type === Attribute::BOOL
+            || $type === Attribute::FLOAT
+            || $type === Attribute::BIGINT
+        );
+    }
 }
  
