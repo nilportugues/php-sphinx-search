@@ -1,7 +1,11 @@
 <?php
 
 namespace NilPortugues\Sphinx\Client;
+use NilPortugues\Sphinx\Helpers\MultiByte;
+use NilPortugues\Sphinx\Helpers\Packer;
 use NilPortugues\Sphinx\Searchd\Command;
+use NilPortugues\Sphinx\Searchd\Version;
+use NilPortugues\Sphinx\SphinxClientException;
 
 /**
  * Class Connection
@@ -9,6 +13,179 @@ use NilPortugues\Sphinx\Searchd\Command;
  */
 class Connection
 {
+    /**
+     * Searchd host (default is "localhost")
+     *
+     * @var string
+     */
+    private $host = 'localhost';
+
+    /**
+     * Searchd port (default is 9312)
+     *
+     * @var int
+     */
+    private $port = 9321;
+
+    /**
+     * @var bool
+     */
+    private $socket = false;
+
+    /**
+     * @var bool
+     */
+    private $path = false;
+
+    /**
+     * Max query time, milliseconds (default is 0, do not limit)
+     *
+     * @var int
+     */
+    private $maxQueryTime = 0;
+
+    /**
+     * Distributed retries count
+     *
+     * @var int
+     */
+    private $retryCount = 0;
+
+    /**
+     * Distributed retries delay
+     *
+     * @var int
+     */
+    private $retryDelay = 0;
+
+    /**
+     * Connect timeout
+     *
+     * @var int
+     */
+    private $timeout;
+
+    /**
+     * Connection error vs remote error flag
+     *
+     * @var bool
+     */
+    private $connectionError = false;
+
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var Response
+     */
+    private $response;
+
+    /**
+     * @var MultiByte
+     */
+    private $multiByte;
+
+    /**
+     * @var ErrorBag
+     */
+    private $errorBag;
+
+    /**
+     * @param Packer $packer
+     * @param MultiByte $multiByte
+     * @param ErrorBag $errorBag
+     */
+    public function __construct(Packer $packer, MultiByte $multiByte, ErrorBag $errorBag)
+    {
+        $this->request = new Request();
+        $this->response = new Response($this, $packer, $multiByte);
+        $this->multiByte = $multiByte;
+        $this->errorBag = $errorBag;
+    }
+
+    /**
+     * @return \NilPortugues\Sphinx\Client\Response
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    /**
+     * @return \NilPortugues\Sphinx\Client\Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getSocket()
+    {
+        return $this->socket;
+    }
+
+    /**
+     * Sets the searchd host name and port.
+     *
+     * @param $host
+     * @param  int $port
+     * @return $this
+     */
+    public function setServer($host, $port = 0)
+    {
+
+        if ($host[0] == '/') {
+            $this->path = 'unix://' . $host;
+        }
+
+        if (substr($host, 0, 7) == "unix://") {
+            $this->path = $host;
+        }
+
+        if ($port) {
+            $this->port = $port;
+        }
+
+        $this->path = '';
+
+        return $this;
+    }
+
+    /**
+     * Sets the server connection timeout (0 to remove).
+     *
+     * @param $timeout
+     * @return $this
+     */
+    public function setConnectTimeout($timeout)
+    {
+        assert($timeout >= 0);
+        $this->timeout = $timeout;
+
+        return $this;
+    }
+
     /**
      * Opens the connection to searchd.
      *
@@ -60,19 +237,19 @@ class Connection
      */
     public function status()
     {
-        $this->multiByte->Push();
+        $this->multiByte->push();
         
         if (!($fp = $this->connect())) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
 
             return false;
         }
 
         $req = pack("nnNN", Command::STATUS, Version::STATUS, 4, 1); // len=4, body=1
         if (!($this->send($fp, $req, 12)) ||
-            !($response = $this->_GetResponse($fp, Version::STATUS))
+            !($response = $this->response->getResponse($fp, Version::STATUS))
         ) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
 
             return false;
         }
@@ -91,7 +268,7 @@ class Connection
                 $p += $len;
             }
 
-        $this->multiByte->Pop();
+        $this->multiByte->pop();
 
         return $res;
     }
@@ -131,8 +308,8 @@ class Connection
             $this->socket = false;
         }
 
-        $errno = 0;
-        $errstr = "";
+        $errorNumber = 0;
+        $errorMessage = "";
         $this->connectionError = false;
 
         if ($this->path) {
@@ -144,9 +321,9 @@ class Connection
         }
 
         if ($this->timeout <= 0)
-            $fp = @fsockopen($host, $port, $errno, $errstr);
+            $fp = @fsockopen($host, $port, $errorNumber, $errorMessage);
         else
-            $fp = @fsockopen($host, $port, $errno, $errstr, $this->timeout);
+            $fp = @fsockopen($host, $port, $errorNumber, $errorMessage, $this->timeout);
 
         if (!$fp) {
             if ($this->path)
@@ -154,8 +331,8 @@ class Connection
             else
                 $location = "{$this->host}:{$this->port}";
 
-            $errstr = trim($errstr);
-            $this->error = "connection to $location failed (errno=$errno, msg=$errstr)";
+            $errorMessage = trim($errorMessage);
+            $this->error = "connection to $location failed (errno=$errorNumber, msg=$errorMessage)";
             $this->connectionError = true;
 
             return false;
@@ -183,6 +360,65 @@ class Connection
         }
 
         return $fp;
+    }
+
+    /**
+     * Closes socket.
+     *
+     * @return bool
+     */
+    public function closeSocket()
+    {
+        if ($this->socket !== false) {
+            return fclose($this->socket);
+        }
+        return false;
+    }
+
+    /**
+     * Get last error flag.
+     * It's thought to be used to inform of network connection errors from searchd errors or broken responses.
+     *
+     * @return boolean
+     */
+    public function isConnectError()
+    {
+        return $this->connectionError;
+    }
+
+    /**
+     * Set maximum query time, in milliseconds, per-index.Integer, 0 means "do not limit".
+     * @param $max
+     *
+     * @throws SphinxClientException
+     * @return $this
+     */
+    public function setMaxQueryTime($max)
+    {
+        if($max < 0){
+            throw new SphinxClientException('Maximum Query Time cannot be below zero');
+        }
+        $this->maxQueryTime = (int)$max;
+
+        return $this;
+    }
+
+    /**
+     * Sets distributed retries count and delay values.
+     *
+     * @param $count
+     * @param int $delay
+     * @return $this
+     */
+    public function setRetries($count, $delay = 0)
+    {
+        assert($count >= 0);
+        assert($delay >= 0);
+
+        $this->retryCount = (int)$count;
+        $this->retryDelay = (int)$delay;
+
+        return $this;
     }
 }
  

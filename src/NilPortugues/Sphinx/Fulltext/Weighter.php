@@ -1,12 +1,35 @@
 <?php
 namespace NilPortugues\Sphinx\Fulltext;
 
+use NilPortugues\Sphinx\SphinxClientException;
+
 /**
  * Class Weighter
  * @package NilPortugues\Sphinx\Fulltext
  */
 class Weighter
 {
+    /**
+     * Per-field weights (default is 1 for all fields)
+     *
+     * @var array
+     */
+    private $weights = array();
+
+    /**
+     * Per-index weights
+     *
+     * @var array
+     */
+    private $indexWeights = array();
+
+    /**
+     * Per-field-name weights
+     *
+     * @var array
+     */
+    private $fieldWeights = array();
+
     /**
      * DEPRECATED; Throws exception. Use SetFieldWeights() instead.
      *
@@ -16,7 +39,7 @@ class Weighter
     public function setWeights(array $weights)
     {
         unset($weights);
-        throw new \Exception("setWeights method is deprecated. Use SetFieldWeights() instead.");
+        throw new SphinxClientException("setWeights method is deprecated. Use SetFieldWeights() instead.");
 
     }
 
@@ -24,6 +47,7 @@ class Weighter
      * Bind per-field weights by name.
      *
      * @param $weights
+     * @return $this
      */
     public function setFieldWeights(array $weights)
     {
@@ -42,6 +66,7 @@ class Weighter
      * Bind per-index weights by name.
      *
      * @param  array $weights
+     * @return $this
      */
     public function setIndexWeights(array $weights)
     {

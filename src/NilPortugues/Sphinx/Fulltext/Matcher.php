@@ -1,5 +1,6 @@
 <?php
 namespace NilPortugues\Sphinx\Fulltext;
+use NilPortugues\Sphinx\SphinxClientException;
 
 /**
  * Class Matcher
@@ -12,8 +13,42 @@ class Matcher
     const PHRASE = 2;
     const BOOLEAN = 3;
     const EXTENDED = 4;
-    const FULLSCAN = 5;
+    const FULL_SCAN = 5;
     const EXTENDED2 = 6; // extended engine V2 (TEMPORARY, WILL BE REMOVED)
+
+    /**
+     * Query matching mode (default is Matcher::ALL)
+     *
+     * @var int
+     */
+    private $mode = self::ALL;
+
+    /**
+     * @return int
+     */
+    public function getMode()
+    {
+        return $this->mode;
+    }
+
+    /**
+     * Sets a matching mode.
+     *
+     * @param int $mode
+     *
+     * @throws SphinxClientException
+     * @return $this
+     */
+    public function setMode($mode)
+    {
+        if (!$this->isValid($mode)) {
+            throw new SphinxClientException('Match mode is not valid');
+        }
+
+        $this->mode = (int) $mode;
+
+        return $this;
+    }
 
     /**
      * @param $mode
@@ -27,7 +62,7 @@ class Matcher
             || $mode == Matcher::PHRASE
             || $mode == Matcher::BOOLEAN
             || $mode == Matcher::EXTENDED
-            || $mode == Matcher::FULLSCAN
+            || $mode == Matcher::FULL_SCAN
             || $mode == Matcher::EXTENDED2
         );
     }

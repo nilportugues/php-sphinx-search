@@ -14,7 +14,7 @@ class Packer
      * @param $f
      * @return string
      */
-    public function _PackFloat($f)
+    public function packFloat($f)
     {
         $t1 = pack("f", $f); // machine order
         list(, $t2) = unpack("L*", $t1); // int in machine order

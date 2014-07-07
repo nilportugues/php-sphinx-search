@@ -1,6 +1,7 @@
 <?php
 
 namespace NilPortugues\Sphinx\Query;
+use NilPortugues\Sphinx\SphinxClientException;
 
 /**
  * Class Attribute
@@ -22,6 +23,20 @@ class Attribute
     const MULTI64 = 0x40000002;
 
     /**
+     * Per-query attribute values overrides
+     *
+     * @var array
+     */
+    private $overrides = array();
+
+    /**
+     * Select-list (attributes or expressions, with optional aliases)
+     *
+     * @var string
+     */
+    private $select = '*';
+
+    /**
      * @param $type
      * @return bool
      */
@@ -33,6 +48,35 @@ class Attribute
             || $type === Attribute::FLOAT
             || $type === Attribute::BIGINT
         );
+    }
+
+    /**
+     * Overrides set attribute values. Attributes can be overridden one by one.
+     * $values must be a hash that maps document IDs to attribute values.
+     *
+     * @param $attributeName
+     * @param $attributeType
+     * @param array $values
+     *
+     * @return $this
+     * @throws SphinxClientException
+     */
+    public function setOverride($attributeName, $attributeType, array $values)
+    {
+        $attributeType = (int) $attributeType;
+        $attributeName = (string) $attributeName;
+
+        if (!$this->isValid($attributeType)) {
+            throw new SphinxClientException('Attribute is not valid');
+        }
+
+        $this->overrides[$attributeName] = array(
+            "attr" => $attributeName,
+            "type" => $attributeType,
+            "values" => $values
+        );
+
+        return $this;
     }
 }
  

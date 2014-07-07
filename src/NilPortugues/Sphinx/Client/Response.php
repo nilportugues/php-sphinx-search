@@ -6,6 +6,7 @@ use NilPortugues\Sphinx\Helpers\MultiByte;
 use NilPortugues\Sphinx\Helpers\Packer;
 use NilPortugues\Sphinx\Query\Attribute;
 use NilPortugues\Sphinx\Searchd\Status;
+use NilPortugues\Sphinx\SphinxClient;
 
 /**
  * Class Response

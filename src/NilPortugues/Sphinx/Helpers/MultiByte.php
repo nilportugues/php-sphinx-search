@@ -8,14 +8,31 @@ namespace NilPortugues\Sphinx\Helpers;
  */
 class MultiByte
 {
+
+    /**
+     * Stored mbstring encoding
+     *
+     * @var string
+     */
+    private $mbstringEncoding = '';
+
+    /**
+     * @return string
+     */
+    public function getMbstringEncoding()
+    {
+        return $this->mbstringEncoding;
+    }
+
     /**
      * Enter mbstring workaround mode
      */
     public function push()
     {
-        $this->_mbenc = "";
+        $this->mbstringEncoding = "";
+
         if (ini_get("mbstring.func_overload") & 2) {
-            $this->_mbenc = mb_internal_encoding();
+            $this->mbstringEncoding = mb_internal_encoding();
             mb_internal_encoding("latin1");
         }
     }
@@ -25,8 +42,9 @@ class MultiByte
      */
     public function pop()
     {
-        if ($this->_mbenc)
-            mb_internal_encoding($this->_mbenc);
+        if ($this->mbstringEncoding) {
+            mb_internal_encoding($this->mbstringEncoding);
+        }
     }
 }
  

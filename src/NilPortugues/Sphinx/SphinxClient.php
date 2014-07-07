@@ -14,6 +14,7 @@
 namespace NilPortugues\Sphinx;
 
 use NilPortugues\Sphinx\Client\Connection;
+use NilPortugues\Sphinx\Client\ErrorBag;
 use NilPortugues\Sphinx\Client\Response;
 use NilPortugues\Sphinx\Helpers\MultiByte;
 use NilPortugues\Sphinx\Helpers\Packer;
@@ -35,20 +36,6 @@ use NilPortugues\Sphinx\Searchd\Version;
 class SphinxClient
 {
     /**
-     * Searchd host (default is "localhost")
-     *
-     * @var string
-     */
-    private $host = 'localhost';
-
-    /**
-     * Searchd port (default is 9312)
-     *
-     * @var int
-     */
-    private $port = 9321;
-
-    /**
      * How many records to seek from result-set start (default is 0)
      *
      * @var int
@@ -62,31 +49,6 @@ class SphinxClient
      */
     private $limit = 20;
 
-    /**
-     * Query matching mode (default is Matcher::ALL)
-     *
-     * @var int
-     */
-    private $mode = Matcher::ALL;
-
-    /**
-     * Per-field weights (default is 1 for all fields)
-     *
-     * @var array
-     */
-    private $weights = array();
-
-    /**
-     * @var int
-     */
-    private $sort; // match sorting mode (default is Sorter::RELEVANCE)
-
-    /**
-     * Attribute to sort by (default is "")
-     *
-     * @var string
-     */
-    private $sortBy = '';
 
     /**
      * Min ID to match (default is 0, which means no limit)
@@ -103,44 +65,11 @@ class SphinxClient
     private $maxId = 0;
 
     /**
-     * @var array
-     */
-    private $filters = array(); // search filters
-
-    /**
-     * Group-by attribute name
-     *
-     * @var string
-     */
-    private $groupBy;
-
-    /**
-     * Group-by function (to pre-process group-by attribute value with)
-     *
-     * @var int
-     */
-    private $groupFunc;
-
-    /**
-     * Group-by sorting clause (to sort groups in result set with)
-     *
-     * @var string
-     */
-    private $groupSort;
-
-    /**
-     * Group-by count-distinct attribute
-     *
-     * @var string
-     */
-    private $groupDistinct;
-
-    /**
      * Max matches to retrieve
      *
      * @var int
      */
-    private $maxMatches;
+    private $maxMatches = 1500;
 
     /**
      * Cutoff to stop searching at (default is 0)
@@ -149,19 +78,6 @@ class SphinxClient
      */
     private $cutOff = 0;
 
-    /**
-     * Distributed retries count
-     *
-     * @var int
-     */
-    private $retryCount;
-
-    /**
-     * Distributed retries delay
-     *
-     * @var int
-     */
-    private $retryDelay;
 
     /**
      * Geographical anchor point
@@ -171,112 +87,20 @@ class SphinxClient
     private $anchor;
 
     /**
-     * Per-index weights
-     *
-     * @var array
-     */
-    private $indexWeights;
-
-    /**
-     * Ranking mode (default is Ranker::PROXIMITY_BM25)
-     *
-     * @var int
-     */
-    private $ranker = Ranker::PROXIMITY_BM25;
-
-    /**
-     * Ranking mode expression (for Ranker::EXPR)
-     *
-     * @var string
-     */
-    private $rankExpr;
-
-    /**
-     * Max query time, milliseconds (default is 0, do not limit)
-     *
-     * @var int
-     */
-    private $maxQueryTime = 0;
-
-    /**
-     * Per-field-name weights
-     *
-     * @var array
-     */
-    private $fieldWeights;
-
-    /**
-     * Per-query attribute values overrides
-     *
-     * @var array
-     */
-    private $overrides;
-
-    /**
-     * Select-list (attributes or expressions, with optional aliases)
-     *
-     * @var string
-     */
-    private $select = '';
-
-    /**
-     * Last error message
-     *
-     * @var string
-     */
-    private $error;
-
-    /**
-     * Last warning message
-     *
-     * @var string
-     */
-    private $warning = '';
-
-    /**
-     * Connection error vs remote error flag
-     *
-     * @var bool
-     */
-    private $connectionError;
-
-    /**
-     * Requests array for multi-query
-     *
-     * @var array
-     */
-    private $requests = array();
-
-    /**
-     * Stored mbstring encoding
-     *
-     * @var string
-     */
-    private $mbstringEncoding;
-
-    /**
      *  Whether $result["matches"] should be a hash or an array
      *
      * @var bool
      */
-    private $arrayResult;
+    private $arrayResult = false;
 
-    /**
-     * Connect timeout
-     *
-     * @var int
-     */
-    private $timeout;
 
-    /**
-     * @var bool
-     */
-    private $path;
 
-    /**
-     * @var bool
-     */
-    private $socket;
+
+
+    //These below should be kept. Above privates belong somewhere else.
+
+
+
 
     /**
      * @var Packer
@@ -304,66 +128,35 @@ class SphinxClient
     private $response;
 
     /**
+     * @var Filter
+     */
+    private $filter;
+
+    /**
+     * @var ErrorBag
+     */
+    private $errorBag;
+
+    /**
      * Creates a new client object and fill defaults
      */
     public function __construct()
     {
-        $this->connection = new Connection();
         $this->packer = new Packer();
         $this->multiByte = new MultiByte();
+        $this->errorBag = new ErrorBag();
 
-        $this->response = new Response($this->connection, $this->packer, $this->multiByte);
+        $this->connection = new Connection($this->packer, $this->multiByte, $this->errorBag);
+        $this->response = $this->connection->getResponse();
+        $this->request = $this->connection->getRequest();
 
+        $this->ranker = new Ranker();
+        $this->filter = new Filter();
         $this->sorter = new Sorter();
         $this->matcher = new Matcher();
         $this->queryGroupBy = new GroupBy();
         $this->queryAttribute = new Attribute();
 
-
-        // Per-client-object settings
-        $this->path = false;
-        $this->socket = false;
-
-
-
-        $this->sort = Sorter::RELEVANCE;
-        $this->sortBy = "";
-
-        $this->minId = 0;
-        $this->maxId = 0;
-
-        $this->filters = array();
-
-        $this->groupBy = "";
-        $this->groupFunc = GroupBy::DAY;
-        $this->groupSort = "@group desc";
-
-        $this->groupDistinct = "";
-        $this->maxMatches = 1000;
-        $this->cutOff = 0;
-        $this->retryCount = 0;
-        $this->retryDelay = 0;
-        $this->anchor = array();
-
-
-        $this->ranker = Ranker::PROXIMITY_BM25;
-        $this->rankExpr = "";
-
-        $this->maxQueryTime = 0;
-
-        $this->overrides = array();
-        $this->select = "*";
-
-        // Per-reply fields (for single-query case)
-        $this->error = "";
-        $this->warning = "";
-        $this->connectionError = false;
-
-        // Requests storage (for multi-query case)
-        $this->requests = array();
-        $this->mbstringEncoding = "";
-        $this->arrayResult = false;
-        $this->timeout = 0;
     }
 
     /**
@@ -371,39 +164,7 @@ class SphinxClient
      */
     public function __destruct()
     {
-        if ($this->socket !== false) {
-            fclose($this->socket);
-        }
-    }
-
-    /**
-     * Gets last error message.
-     *
-     * @return string
-     */
-    public function getLastError()
-    {
-        return $this->error;
-    }
-
-    /**
-     * Gets last warning message.
-     *
-     * @return string
-     */
-    public function getLastWarning()
-    {
-        return $this->warning;
-    }
-
-    /**
-     * Get last error flag. It's thought to be used to inform of network connection errors from searchd errors or broken responses.
-     *
-     * @return boolean
-     */
-    public function isConnectError()
-    {
-        return $this->connectionError;
+        $this->connection->closeSocket();
     }
 
     /**
@@ -415,22 +176,7 @@ class SphinxClient
      */
     public function setServer($host, $port = 0)
     {
-        $host = (string) $host;
-        $port = (int) $port;
-
-        if ($host[0] == '/') {
-            $this->path = 'unix://' . $host;
-        }
-
-        if (substr($host, 0, 7) == "unix://") {
-            $this->path = $host;
-        }
-
-        if ($port) {
-            $this->port = $port;
-        }
-
-        $this->path = '';
+        $this->connection->setServer((string) $host, (int) $port);
 
         return $this;
     }
@@ -443,8 +189,7 @@ class SphinxClient
      */
     public function setConnectTimeout($timeout)
     {
-        assert($timeout >= 0);
-        $this->timeout = (int) $timeout;
+        $this->connection->setConnectTimeout((int) $timeout);
 
         return $this;
     }
@@ -479,19 +224,7 @@ class SphinxClient
         return $this;
     }
 
-    /**
-     * Set maximum query time, in milliseconds, per-index.Integer, 0 means "do not limit".
-     *
-     * @param $max
-     * @return SphinxClient
-     */
-    public function setMaxQueryTime($max)
-    {
-        assert($max >= 0);
-        $this->maxQueryTime = (int)$max;
 
-        return $this;
-    }
 
     /**
      * Sets a matching mode.
@@ -503,11 +236,7 @@ class SphinxClient
      */
     public function setMatchMode($mode)
     {
-        if (!$this->matcher->isValid($mode)) {
-            throw new SphinxClientException('Match mode is not valid');
-        }
-
-        $this->mode = (int) $mode;
+        $this->matcher->setMode($mode);
 
         return $this;
     }
@@ -523,8 +252,8 @@ class SphinxClient
     {
         assert($ranker === 0 || $ranker >= 1 && $ranker < Ranker::TOTAL);
 
-        $this->ranker = (int) $ranker;
-        $this->rankExpr = (string) $rankExpr;
+        $this->ranker->setRanker((int) $ranker);
+        $this->ranker->setRankExpr((string) $rankExpr);
 
         return $this;
     }
@@ -533,21 +262,14 @@ class SphinxClient
      * Set matches sorting mode.
      *
      * @param $mode
-     * @param  string $sortby
+     * @param  string $sortBy
      *
      * @throws SphinxClientException
      * @return SphinxClient
      */
-    public function setSortMode($mode, $sortby = "")
+    public function setSortMode($mode, $sortBy = "")
     {
-        if (!$this->sorter->isValid($mode)) {
-            throw new SphinxClientException('Sorting mode is not valid');
-        }
-
-        assert($mode == Sorter::RELEVANCE || strlen($sortby) > 0);
-
-        $this->sort = (int)$mode;
-        $this->sortBy = (string)$sortby;
+        $this->sorter->setSortMode($mode, $sortBy);
 
         return $this;
     }
@@ -580,51 +302,11 @@ class SphinxClient
      */
     public function setFilter($attribute, array $values, $exclude = false)
     {
-        assert(count($values));
-
-        $exclude = $this->convertToBoolean($exclude);
-
-        if (is_array($values) && count($values)) {
-
-            foreach ($values as $value) {
-                assert(is_numeric($value));
-            }
-
-            $this->filters[] = array(
-                "type" => Filter::VALUES,
-                "attr" => (string)$attribute,
-                "exclude" => $exclude,
-                "values" => $values
-            );
-        }
+        $this->filter->setFilter($attribute, $values, $exclude);
 
         return $this;
     }
 
-    /**
-     * @author: Nil Portugués Calderó
-     * Converts values to its boolean representation.
-     *
-     * @param $exclude
-     * @return bool
-     */
-    private function convertToBoolean($exclude)
-    {
-        if (is_numeric($exclude) && ($exclude == 0 || $exclude == 1)) {
-            settype($exclude, 'boolean');
-        } elseif (
-            $exclude === true
-            || $exclude === false
-            || strtolower(trim($exclude)) === 'true'
-            || strtolower(trim($exclude)) === 'false'
-        ) {
-            settype($exclude, 'boolean');
-        } else {
-            $exclude = false;
-        }
-
-        return $exclude;
-    }
 
     /**
      * @param $attribute
@@ -635,15 +317,7 @@ class SphinxClient
      */
     public function setFilterRange($attribute, $min, $max, $exclude = false)
     {
-        assert($min <= $max);
-
-        $this->filters[] = array(
-            "type" => Filter::RANGE,
-            "attr" => (string)$attribute,
-            "min" => (int)$min,
-            "max" => (int)$max,
-            "exclude" => $this->convertToBoolean($exclude)
-        );
+        $this->filter->setFilterRange($attribute, $min, $max, $exclude);
 
         return $this;
     }
@@ -659,15 +333,7 @@ class SphinxClient
      */
     public function setFilterFloatRange($attribute, $min, $max, $exclude = false)
     {
-        assert($min <= $max);
-
-        $this->filters[] = array(
-            "type" => Filter::FLOATRANGE,
-            "attr" => (string)$attribute,
-            "min" => (float)$min,
-            "max" => (float)$max,
-            "exclude" => $this->convertToBoolean($exclude)
-        );
+        $this->filter->setFilterFloatRange($attribute, $min, $max, $exclude);
 
         return $this;
     }
@@ -700,24 +366,15 @@ class SphinxClient
      *
      * @param $attribute
      * @param $func
-     * @param  string $groupsort
-     *
-     * @throws SphinxClientException
-     * @return SphinxClient
+     * @param string $groupsort
+     * @return $this
      */
     public function setGroupBy($attribute, $func, $groupsort = "@group desc")
     {
-        if (!$this->queryGroupBy->isValid($func)) {
-            throw new SphinxClientException('Group By function is not valid');
-        }
-
-        $this->groupBy = (string)$attribute;
-        $this->groupSort = (string)$groupsort;
-        $this->groupFunc = $func;
+        $this->queryGroupBy->setGroupBy($attribute, $func, $groupsort);
 
         return $this;
     }
-
 
     /**
      * Sets count-distinct attribute for group-by queries.
@@ -727,7 +384,7 @@ class SphinxClient
      */
     public function setGroupDistinct($attribute)
     {
-        $this->groupDistinct = (string)$attribute;
+        $this->queryGroupBy->setGroupDistinct($attribute);
 
         return $this;
     }
@@ -741,11 +398,7 @@ class SphinxClient
      */
     public function setRetries($count, $delay = 0)
     {
-        assert($count >= 0);
-        assert($delay >= 0);
-
-        $this->retryCount = (int)$count;
-        $this->retryDelay = (int)$delay;
+        $this->connection->setRetries($count, $delay);
 
         return $this;
     }
@@ -771,24 +424,11 @@ class SphinxClient
      * @param $attributeName
      * @param $attributeType
      * @param array $values
-     *
-     * @throws SphinxClientException
-     * @return SphinxClient
+     * @return $this
      */
     public function setOverride($attributeName, $attributeType, array $values)
     {
-        $attributeType = (int) $attributeType;
-        $attributeName = (string) $attributeName;
-
-        if (!$this->queryAttribute->isValid($attributeType)) {
-            throw new SphinxClientException('Attribute is not valid');
-        }
-
-        $this->overrides[$attributeName] = array(
-            "attr" => $attributeName,
-            "type" => $attributeType,
-            "values" => $values
-        );
+        $this->queryAttribute->setOverride($attributeName, $attributeType, $values);
 
         return $this;
     }
@@ -813,8 +453,7 @@ class SphinxClient
      */
     public function resetFilters()
     {
-        $this->filters = array();
-        $this->anchor = array();
+        $this->filter->reset();
 
         return $this;
     }
@@ -826,10 +465,7 @@ class SphinxClient
      */
     public function resetGroupBy()
     {
-        $this->groupBy = "";
-        $this->groupFunc = GroupBy::DAY;
-        $this->groupSort = "@group desc";
-        $this->groupDistinct = "";
+        $this->queryGroupBy->reset();
 
         return $this;
     }
@@ -874,6 +510,9 @@ class SphinxClient
     }
 
     /**
+     * @TODO: NEEDS TO REPLACE ALMOST EVERY PRIVATE VAR REFERENCE FOR THE OBJECT GETTER OR SETTER.
+     *
+     *
      * Adds a query to a multi-query batch. Returns index into results array from RunQueries() call.
      *
      * @param $query
@@ -886,10 +525,11 @@ class SphinxClient
         // mbstring workaround
         $this->multiByte->Push();
 
+
         // build request
         $req = pack("NNNN", $this->offset, $this->limit, $this->mode, $this->ranker);
-        if ($this->ranker == Ranker::EXPR) {
-            $req .= pack("N", strlen($this->rankExpr)) . $this->rankExpr;
+        if ($this->ranker->getRanker() == Ranker::EXPR) {
+            $req .= pack("N", strlen($this->ranker->getRankExpr())) . $this->ranker->getRankExpr();
         }
 
         $req .= pack("N", $this->sort); // (deprecated) sort mode
@@ -918,8 +558,8 @@ class SphinxClient
                     $req .= $this->packer->sphPackI64($filter["min"]) . $this->packer->sphPackI64($filter["max"]);
                     break;
 
-                case Filter::FLOATRANGE:
-                    $req .= $this->packer->_PackFloat($filter["min"]) . $this->packer->_PackFloat($filter["max"]);
+                case Filter::FLOAT_RANGE:
+                    $req .= $this->packer->packFloat($filter["min"]) . $this->packer->packFloat($filter["max"]);
                     break;
 
                 default:
@@ -943,7 +583,7 @@ class SphinxClient
             $req .= pack("N", 1);
             $req .= pack("N", strlen($a["attrlat"])) . $a["attrlat"];
             $req .= pack("N", strlen($a["attrlong"])) . $a["attrlong"];
-            $req .= $this->packer->_PackFloat($a["lat"]) . $this->packer->_PackFloat($a["long"]);
+            $req .= $this->packer->packFloat($a["lat"]) . $this->packer->packFloat($a["long"]);
         }
 
         // per-index weights
@@ -974,7 +614,7 @@ class SphinxClient
                 $req .= $this->packer->sphPackU64($id);
                 switch ($entry["type"]) {
                     case Attribute::FLOAT:
-                        $req .= $this->packer->_PackFloat($val);
+                        $req .= $this->packer->packFloat($val);
                         break;
                     case Attribute::BIGINT:
                         $req .= $this->packer->sphPackI64($val);
@@ -1025,7 +665,7 @@ class SphinxClient
         $req = pack("nnNNN", Command::SEARCH, Version::SEARCH, $len, 0, $nreqs) . $req; // add header
 
         if (!($this->connection->send($fp, $req, $len + 8)) ||
-            !($response = $this->_GetResponse($fp, Version::SEARCH))
+            !($response = $this->response->getResponse($fp, Version::SEARCH))
         ) {
             $this->multiByte->Pop();
 
@@ -1300,7 +940,7 @@ class SphinxClient
         $len = strlen($req);
         $req = pack("nnN", Command::KEYWORDS, Version::KEYWORDS, $len) . $req; // add header
         if (!($this->connection->send($fp, $req, $len + 8)) ||
-            !($response = $this->_GetResponse($fp, Version::KEYWORDS))
+            !($response = $this->response->getResponse($fp, Version::KEYWORDS))
         ) {
             $this->multiByte->Pop();
 
@@ -1450,7 +1090,7 @@ class SphinxClient
             return -1;
         }
 
-        if (!($response = $this->_GetResponse($fp, Version::UPDATE))) {
+        if (!($response = $this->response->getResponse($fp, Version::UPDATE))) {
             $this->multiByte->pop();
             return -1;
         }
@@ -1474,9 +1114,9 @@ class SphinxClient
             return -1;
         }
 
-        $req = pack("nnN", Command::FLUSHATTRS, Version::FLUSHATTRS, 0); // len=0
+        $req = pack("nnN", Command::FLUSH_ATTRS, Version::FLUSHATTRS, 0); // len=0
         if (!($this->connection->send($fp, $req, 8)) ||
-            !($response = $this->_GetResponse($fp, Version::FLUSHATTRS))
+            !($response = $this->response->getResponse($fp, Version::FLUSHATTRS))
         ) {
             $this->multiByte->Pop();
 
