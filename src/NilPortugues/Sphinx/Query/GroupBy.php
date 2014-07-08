@@ -1,6 +1,17 @@
 <?php
 namespace NilPortugues\Sphinx\Query;
+
 use NilPortugues\Sphinx\SphinxClientException;
+
+/**
+ * Kept for compatibility issues.
+ */
+define ("SPH_GROUPBY_DAY", GroupBy::DAY);
+define ("SPH_GROUPBY_WEEK", GroupBy::WEEK);
+define ("SPH_GROUPBY_MONTH", GroupBy::MONTH);
+define ("SPH_GROUPBY_YEAR", GroupBy::YEAR);
+define ("SPH_GROUPBY_ATTR", GroupBy::ATTR);
+define ("SPH_GROUPBY_ATTRPAIR", GroupBy::ATTRIBUTE_PAIR);
 
 /**
  * Class GroupBy
@@ -106,12 +117,11 @@ class GroupBy
             throw new SphinxClientException('Group By function is not valid');
         }
 
-        $this->groupBy = (string)$attribute;
-        $this->groupSort = (string)$groupSort;
+        $this->groupBy = (string) $attribute;
+        $this->groupSort = (string) $groupSort;
         $this->groupFunc = $function;
 
         return $this;
     }
 
 }
- 

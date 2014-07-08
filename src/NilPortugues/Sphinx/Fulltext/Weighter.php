@@ -33,10 +33,10 @@ class Weighter
     /**
      * DEPRECATED; Throws exception. Use SetFieldWeights() instead.
      *
-     * @param  array $weights
+     * @param  array      $weights
      * @throws \Exception
      */
-    public function setWeights(array $weights)
+    public function setWeights(array &$weights)
     {
         unset($weights);
         throw new SphinxClientException("setWeights method is deprecated. Use SetFieldWeights() instead.");
@@ -51,11 +51,9 @@ class Weighter
      */
     public function setFieldWeights(array $weights)
     {
-        assert(is_array($weights));
-
-        foreach ($weights as $name => $weight) {
-            assert(is_string($name));
-            assert(is_int($weight));
+        foreach ($weights as &$name => &$weight) {
+            $name = (string) $name;
+            $weight = (int) $weight;
         }
         $this->fieldWeights = $weights;
 
@@ -70,9 +68,9 @@ class Weighter
      */
     public function setIndexWeights(array $weights)
     {
-        foreach ($weights as $index => $weight) {
-            assert(is_string($index));
-            assert(is_int($weight));
+        foreach ($weights as &$index => &$weight) {
+            $index = (string) $index;
+            $weight = (int) $weight;
         }
 
         $this->indexWeights = $weights;
@@ -80,4 +78,3 @@ class Weighter
         return $this;
     }
 }
- 

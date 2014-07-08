@@ -6,7 +6,6 @@ use NilPortugues\Sphinx\Helpers\MultiByte;
 use NilPortugues\Sphinx\Helpers\Packer;
 use NilPortugues\Sphinx\Query\Attribute;
 use NilPortugues\Sphinx\Searchd\Status;
-use NilPortugues\Sphinx\SphinxClient;
 
 /**
  * Class Response
@@ -30,15 +29,34 @@ class Response
     private $multiByte;
 
     /**
-     * @param Connection $connection
-     * @param Packer $packer
-     * @param MultiByte $multiByte
+     * @var ErrorBag
      */
-    public function __construct(Connection $connection, Packer $packer, MultiByte $multiByte)
+    private $errorBag;
+
+    /**
+     *  Whether $result["matches"] should be a hash or an array
+     *
+     * @var bool
+     */
+    private $arrayResult = false;
+
+    /**
+     * @var int
+     */
+    private $position = 0;
+
+    /**
+     * @param Connection $connection
+     * @param Packer     $packer
+     * @param MultiByte  $multiByte
+     * @param ErrorBag   $errorBag
+     */
+    public function __construct(Connection $connection, Packer $packer, MultiByte $multiByte, ErrorBag $errorBag)
     {
         $this->connection = $connection;
         $this->packer = $packer;
         $this->multiByte = $multiByte;
+        $this->errorBag = $errorBag;
     }
 
     /**
@@ -68,15 +86,21 @@ class Response
             }
         }
 
-        if ($this->socket === false)
+        if ($this->connection->getSocket() === false) {
             fclose($fp);
+        }
 
         // check response
         $read = strlen($response);
         if (!$response || $read != $len) {
-            $this->error = $len
-                ? "failed to read searchd response (status=$status, ver=$ver, len=$len, read=$read)"
-                : "received zero-sized searchd response";
+
+            $errorMessage = "received zero-sized searchd response";
+
+            if ($len) {
+                $errorMessage = "failed to read searchd response (status=$status, ver=$ver, len=$len, read=$read)";
+            }
+
+            $this->errorBag->setError($errorMessage);
 
             return false;
         }
@@ -85,40 +109,41 @@ class Response
         if ($status == Status::WARNING) {
             list($temp, $wlen) = unpack("N*", substr($response, 0, 4));
             unset($temp);
-            $this->warning = substr($response, 4, $wlen);
+            $this->errorBag->setWarning(substr($response, 4, $wlen));
 
             return substr($response, 4 + $wlen);
         }
         if ($status == Status::ERROR) {
-            $this->error = "searchd error: " . substr($response, 4);
+            $this->errorBag->setError("searchd error: " . substr($response, 4));
 
             return false;
         }
         if ($status == Status::RETRY) {
-            $this->error = "temporary searchd error: " . substr($response, 4);
+            $this->errorBag->setError("temporary searchd error: " . substr($response, 4));
 
             return false;
         }
         if ($status != Status::OK) {
-            $this->error = "unknown status code '$status'";
+            $this->errorBag->setError("unknown status code '$status'");
 
             return false;
         }
 
         // check version
         if ($ver < $client_ver) {
-            $this->warning = sprintf(
+            $warning = sprintf(
                 "searchd command v.%d.%d older than client's v.%d.%d, some options might not work",
                 $ver >> 8,
                 $ver & 0xff,
                 $client_ver >> 8,
                 $client_ver & 0xff
             );
+
+            $this->errorBag->setWarning($warning);
         }
 
         return $response;
     }
-
 
     /**
      * Helper function that parses and returns search query (or queries) response
@@ -128,11 +153,11 @@ class Response
      */
     public function parseSearchResponse($response, $nreqs)
     {
-        $p = 0; // current position
+        $this->position = 0; // current position
         $max = strlen($response); // max position for checks, to protect against broken responses
 
         $results = array();
-        for ($ires = 0; $ires < $nreqs && $p < $max; $ires++) {
+        for ($ires = 0; $ires < $nreqs && $this->position < $max; $ires++) {
             $results[] = array();
             $result =& $results[$ires];
 
@@ -140,15 +165,15 @@ class Response
             $result["warning"] = "";
 
             // extract status
-            list(, $status) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
+            list(, $status) = unpack("N*", substr($response, $this->position, 4));
+            $this->position += 4;
             $result["status"] = $status;
 
             if ($status != Status::OK) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $message = substr($response, $p, $len);
-                $p += $len;
+                list(, $len) = unpack("N*", substr($response, $this->position, 4));
+                $this->position += 4;
+                $message = substr($response, $this->position, $len);
+                $this->position += $len;
 
                 if ($status == Status::WARNING) {
                     $result["warning"] = $message;
@@ -162,96 +187,96 @@ class Response
             $fields = array();
             $attrs = array();
 
-            list(, $nfields) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
+            list(, $nfields) = unpack("N*", substr($response, $this->position, 4));
+            $this->position += 4;
 
-            while ($nfields-- > 0 && $p < $max) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $fields[] = substr($response, $p, $len);
-                $p += $len;
+            while ($nfields-- > 0 && $this->position < $max) {
+                list(, $len) = unpack("N*", substr($response, $this->position, 4));
+                $this->position += 4;
+                $fields[] = substr($response, $this->position, $len);
+                $this->position += $len;
             }
             $result["fields"] = $fields;
 
-            list(, $nattrs) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
+            list(, $nattrs) = unpack("N*", substr($response, $this->position, 4));
+            $this->position += 4;
 
-            while ($nattrs-- > 0 && $p < $max) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
-                $attr = substr($response, $p, $len);
-                $p += $len;
-                list(, $type) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
+            while ($nattrs-- > 0 && $this->position < $max) {
+                list(, $len) = unpack("N*", substr($response, $this->position, 4));
+                $this->position += 4;
+                $attr = substr($response, $this->position, $len);
+                $this->position += $len;
+                list(, $type) = unpack("N*", substr($response, $this->position, 4));
+                $this->position += 4;
                 $attrs[$attr] = $type;
             }
             $result["attrs"] = $attrs;
 
             // read match count
-            list(, $count) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
-            list(, $id64) = unpack("N*", substr($response, $p, 4));
-            $p += 4;
+            list(, $count) = unpack("N*", substr($response, $this->position, 4));
+            $this->position += 4;
+            list(, $id64) = unpack("N*", substr($response, $this->position, 4));
+            $this->position += 4;
 
             // read matches
             $idx = -1;
-            while ($count-- > 0 && $p < $max) {
+            while ($count-- > 0 && $this->position < $max) {
                 // index into result array
                 $idx++;
 
                 // parse document id and weight
                 if ($id64) {
-                    $doc = $this->packer->sphUnpackU64(substr($response, $p, 8));
-                    $p += 8;
+                    $doc = $this->packer->sphUnpackU64(substr($response, $this->position, 8));
+                    $this->position += 8;
 
-                    list(, $weight) = unpack("N*", substr($response, $p, 4));
-                    $p += 4;
+                    list(, $weight) = unpack("N*", substr($response, $this->position, 4));
+                    $this->position += 4;
 
                 } else {
-                    list ($doc, $weight) = array_values(unpack("N*N*",
-                        substr($response, $p, 8)));
-                    $p += 8;
+                    list ($doc, $weight) = array_values(unpack("N*N*", substr($response, $this->position, 8)));
+                    $this->position += 8;
                     $doc = $this->sphFixUint($doc);
                 }
 
                 $weight = sprintf("%u", $weight);
 
                 // create match entry
-                if ($this->arrayResult)
+                if ($this->arrayResult) {
                     $result["matches"][$idx] = array("id" => $doc, "weight" => $weight);
-                else
+                } else {
                     $result["matches"][$doc]["weight"] = $weight;
+                }
 
                 // parse and create attributes
                 $attrvals = array();
                 foreach ($attrs as $attr => $type) {
                     // handle 64bit ints
                     if ($type == Attribute::BIGINT) {
-                        $attrvals[$attr] = $this->packer->sphUnpackI64(substr($response, $p, 8));
-                        $p += 8;
+                        $attrvals[$attr] = $this->packer->sphUnpackI64(substr($response, $this->position, 8));
+                        $this->position += 8;
                         continue;
                     }
 
                     // handle floats
                     if ($type == Attribute::FLOAT) {
-                        list(, $uval) = unpack("N*", substr($response, $p, 4));
-                        $p += 4;
+                        list(, $uval) = unpack("N*", substr($response, $this->position, 4));
+                        $this->position += 4;
                         list(, $fval) = unpack("f*", pack("L", $uval));
                         $attrvals[$attr] = $fval;
                         continue;
                     }
 
                     // handle everything else as unsigned ints
-                    list(, $val) = unpack("N*", substr($response, $p, 4));
-                    $p += 4;
+                    list(, $val) = unpack("N*", substr($response, $this->position, 4));
+                    $this->position += 4;
 
                     if ($type == Attribute::MULTI) {
                         $attrvals[$attr] = array();
                         $nvalues = $val;
 
-                        while ($nvalues-- > 0 && $p < $max) {
-                            list(, $val) = unpack("N*", substr($response, $p, 4));
-                            $p += 4;
+                        while ($nvalues-- > 0 && $this->position < $max) {
+                            list(, $val) = unpack("N*", substr($response, $this->position, 4));
+                            $this->position += 4;
                             $attrvals[$attr][] = $this->sphFixUint($val);
                         }
 
@@ -260,15 +285,15 @@ class Response
                         $attrvals[$attr] = array();
                         $nvalues = $val;
 
-                        while ($nvalues > 0 && $p < $max) {
-                            $attrvals[$attr][] = $this->packer->sphUnpackI64(substr($response, $p, 8));
-                            $p += 8;
+                        while ($nvalues > 0 && $this->position < $max) {
+                            $attrvals[$attr][] = $this->packer->sphUnpackI64(substr($response, $this->position, 8));
+                            $this->position += 8;
                             $nvalues -= 2;
                         }
 
                     } elseif ($type == Attribute::STRING) {
-                        $attrvals[$attr] = substr($response, $p, $val);
-                        $p += $val;
+                        $attrvals[$attr] = substr($response, $this->position, $val);
+                        $this->position += $val;
 
                     } else {
                         $attrvals[$attr] = $this->sphFixUint($val);
@@ -277,33 +302,35 @@ class Response
 
                 if ($this->arrayResult) {
                     $result["matches"][$idx]["attrs"] = $attrvals;
-                }  else {
+                } else {
                     $result["matches"][$doc]["attrs"] = $attrvals;
                 }
             }
 
-            list ($total, $total_found, $msecs, $words) =  array_values(unpack("N*N*N*N*", substr($response, $p, 16)));
+            list ($total, $total_found, $msecs, $words) =  array_values(
+                unpack("N*N*N*N*", substr($response, $this->position, 16))
+            );
 
             $result["total"] = sprintf("%u", $total);
             $result["total_found"] = sprintf("%u", $total_found);
             $result["time"] = sprintf("%.3f", $msecs / 1000);
-            $p += 16;
+            $this->position += 16;
 
-            while ($words-- > 0 && $p < $max) {
-                list(, $len) = unpack("N*", substr($response, $p, 4));
-                $p += 4;
+            while ($words-- > 0 && $this->position < $max) {
+                list(, $len) = unpack("N*", substr($response, $this->position, 4));
+                $this->position += 4;
 
-                $word = substr($response, $p, $len);
-                $p += $len;
+                $word = substr($response, $this->position, $len);
+                $this->position += $len;
 
-                list ($docs, $hits) = array_values(unpack("N*N*", substr($response, $p, 8)));
-                $p += 8;
+                list ($docs, $hits) = array_values(unpack("N*N*", substr($response, $this->position, 8)));
+                $this->position += 8;
 
                 $result["words"][$word] = array("docs" => sprintf("%u", $docs), "hits" => sprintf("%u", $hits));
             }
         }
 
-        $this->multiByte->Pop();
+        $this->multiByte->pop();
 
         return $results;
     }
@@ -325,4 +352,3 @@ class Response
         return $value;
     }
 }
- 

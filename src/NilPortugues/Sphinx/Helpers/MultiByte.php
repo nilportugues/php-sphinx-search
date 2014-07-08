@@ -8,7 +8,6 @@ namespace NilPortugues\Sphinx\Helpers;
  */
 class MultiByte
 {
-
     /**
      * Stored mbstring encoding
      *
@@ -47,4 +46,3 @@ class MultiByte
         }
     }
 }
- 

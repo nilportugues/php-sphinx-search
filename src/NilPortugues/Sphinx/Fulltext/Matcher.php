@@ -1,6 +1,18 @@
 <?php
 namespace NilPortugues\Sphinx\Fulltext;
+
 use NilPortugues\Sphinx\SphinxClientException;
+
+/**
+ * Kept for compatibility issues.
+ */
+define ("SPH_MATCH_ALL", Matcher::ALL);
+define ("SPH_MATCH_ANY", Matcher::ANY);
+define ("SPH_MATCH_PHRASE", Matcher::PHRASE);
+define ("SPH_MATCH_BOOLEAN", Matcher::BOOLEAN);
+define ("SPH_MATCH_EXTENDED", Matcher::EXTENDED);
+define ("SPH_MATCH_FULLSCAN", Matcher::FULL_SCAN);
+define ("SPH_MATCH_EXTENDED2", Matcher::EXTENDED2);
 
 /**
  * Class Matcher
@@ -67,4 +79,3 @@ class Matcher
         );
     }
 }
- 

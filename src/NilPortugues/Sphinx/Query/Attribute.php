@@ -1,7 +1,21 @@
 <?php
 
 namespace NilPortugues\Sphinx\Query;
+
 use NilPortugues\Sphinx\SphinxClientException;
+
+/**
+ * Kept for compatibility issues.
+ */
+define ("SPH_ATTR_INTEGER", Attribute::INTEGER);
+define ("SPH_ATTR_TIMESTAMP", Attribute::TIMESTAMP);
+define ("SPH_ATTR_ORDINAL", Attribute::ORDINAL);
+define ("SPH_ATTR_BOOL", Attribute::BOOL);
+define ("SPH_ATTR_FLOAT", Attribute::FLOAT);
+define ("SPH_ATTR_BIGINT", Attribute::BIGINT);
+define ("SPH_ATTR_STRING", Attribute::STRING);
+define ("SPH_ATTR_MULTI", Attribute::MULTI);
+define ("SPH_ATTR_MULTI64", Attribute::MULTI64);
 
 /**
  * Class Attribute
@@ -79,4 +93,3 @@ class Attribute
         return $this;
     }
 }
- 

@@ -1,6 +1,7 @@
 <?php
 
 namespace NilPortugues\Sphinx\Client;
+
 use NilPortugues\Sphinx\Helpers\MultiByte;
 use NilPortugues\Sphinx\Helpers\Packer;
 use NilPortugues\Sphinx\Searchd\Command;
@@ -93,14 +94,14 @@ class Connection
     private $errorBag;
 
     /**
-     * @param Packer $packer
+     * @param Packer    $packer
      * @param MultiByte $multiByte
-     * @param ErrorBag $errorBag
+     * @param ErrorBag  $errorBag
      */
     public function __construct(Packer $packer, MultiByte $multiByte, ErrorBag $errorBag)
     {
         $this->request = new Request();
-        $this->response = new Response($this, $packer, $multiByte);
+        $this->response = new Response($this, $packer, $multiByte, $errorBag);
         $this->multiByte = $multiByte;
         $this->errorBag = $errorBag;
     }
@@ -149,7 +150,7 @@ class Connection
      * Sets the searchd host name and port.
      *
      * @param $host
-     * @param  int $port
+     * @param  int   $port
      * @return $this
      */
     public function setServer($host, $port = 0)
@@ -194,7 +195,7 @@ class Connection
     public function open()
     {
         if ($this->socket !== false) {
-            $this->error = 'already connected';
+            $this->errorBag->setError('already connected');
 
             return false;
         }
@@ -220,7 +221,7 @@ class Connection
     public function close()
     {
         if ($this->socket === false) {
-            $this->error = 'not connected';
+            $this->errorBag->setError('not connected');
 
             return false;
         }
@@ -238,7 +239,7 @@ class Connection
     public function status()
     {
         $this->multiByte->push();
-        
+
         if (!($fp = $this->connect())) {
             $this->multiByte->pop();
 
@@ -260,19 +261,19 @@ class Connection
         $p += 8;
 
         $res = array();
-        for ($i = 0; $i < $rows; $i++)
+        for ($i = 0; $i < $rows; $i++) {
             for ($j = 0; $j < $cols; $j++) {
                 list(, $len) = unpack("N*", substr($response, $p, 4));
                 $p += 4;
                 $res[$i][] = substr($response, $p, $len);
                 $p += $len;
             }
+        }
 
         $this->multiByte->pop();
 
         return $res;
     }
-
 
     /**
      * @param $handle
@@ -283,7 +284,7 @@ class Connection
     public function send($handle, $data, $length)
     {
         if (feof($handle) || fwrite($handle, $data, $length) !== $length) {
-            $this->error = 'connection unexpectedly closed (timed out?)';
+            $this->errorBag->setError('connection unexpectedly closed (timed out?)');
             $this->connectionError = true;
 
             return false;
@@ -301,8 +302,9 @@ class Connection
         if ($this->socket !== false) {
             // we are in persistent connection mode, so we have a socket
             // however, need to check whether it's still alive
-            if (!@feof($this->socket))
+            if (!@feof($this->socket)) {
                 return $this->socket;
+            }
 
             // force reopen
             $this->socket = false;
@@ -320,19 +322,22 @@ class Connection
             $port = $this->port;
         }
 
-        if ($this->timeout <= 0)
+        if ($this->timeout <= 0) {
             $fp = @fsockopen($host, $port, $errorNumber, $errorMessage);
-        else
+        } else {
             $fp = @fsockopen($host, $port, $errorNumber, $errorMessage, $this->timeout);
+        }
+
 
         if (!$fp) {
-            if ($this->path)
+            if ($this->path) {
                 $location = $this->path;
-            else
+            } else {
                 $location = "{$this->host}:{$this->port}";
+            }
 
             $errorMessage = trim($errorMessage);
-            $this->error = "connection to $location failed (errno=$errorNumber, msg=$errorMessage)";
+            $this->errorBag->setError("connection to $location failed (errno=$errorNumber, msg=$errorMessage)");
             $this->connectionError = true;
 
             return false;
@@ -344,17 +349,17 @@ class Connection
         // TCP stack could throttle write-write-read pattern because of Nagle.
         if (!$this->send($fp, pack("N", 1), 4)) {
             fclose($fp);
-            $this->error = "failed to send client protocol version";
+            $this->errorBag->setError("failed to send client protocol version");
 
             return false;
         }
 
         // check version
         list(, $v) = unpack("N*", fread($fp, 4));
-        $v = (int)$v;
+        $v = (int) $v;
         if ($v < 1) {
             fclose($fp);
-            $this->error = "expected searchd protocol version 1+, got version '$v'";
+            $this->errorBag->setError("expected searchd protocol version 1+, got version '$v'");
 
             return false;
         }
@@ -372,6 +377,7 @@ class Connection
         if ($this->socket !== false) {
             return fclose($this->socket);
         }
+
         return false;
     }
 
@@ -395,10 +401,10 @@ class Connection
      */
     public function setMaxQueryTime($max)
     {
-        if($max < 0){
+        if ($max < 0) {
             throw new SphinxClientException('Maximum Query Time cannot be below zero');
         }
-        $this->maxQueryTime = (int)$max;
+        $this->maxQueryTime = (int) $max;
 
         return $this;
     }
@@ -407,7 +413,7 @@ class Connection
      * Sets distributed retries count and delay values.
      *
      * @param $count
-     * @param int $delay
+     * @param  int   $delay
      * @return $this
      */
     public function setRetries($count, $delay = 0)
@@ -415,10 +421,9 @@ class Connection
         assert($count >= 0);
         assert($delay >= 0);
 
-        $this->retryCount = (int)$count;
-        $this->retryDelay = (int)$delay;
+        $this->retryCount = (int) $count;
+        $this->retryDelay = (int) $delay;
 
         return $this;
     }
 }
- 

@@ -3,6 +3,22 @@
 namespace NilPortugues\Sphinx\Fulltext;
 
 /**
+ * Kept for compatibility issues.
+ */
+use NilPortugues\Sphinx\SphinxClientException;
+
+define ("SPH_RANK_PROXIMITY_BM25", Ranker::PROXIMITY_BM25);
+define ("SPH_RANK_BM25", Ranker::BM25);
+define ("SPH_RANK_NONE", Ranker::NONE);
+define ("SPH_RANK_WORDCOUNT", Ranker::WORD_COUNT);
+define ("SPH_RANK_PROXIMITY", Ranker::PROXIMITY);
+define ("SPH_RANK_MATCHANY", Ranker::MATCH_ANY);
+define ("SPH_RANK_FIELDMASK", Ranker::FIELD_MASK);
+define ("SPH_RANK_SPH04", Ranker::SPH04);
+define ("SPH_RANK_EXPR", Ranker::EXPR);
+define ("SPH_RANK_TOTAL", Ranker::TOTAL);
+
+/**
  * Class Ranker
  * @package NilPortugues\Sphinx\Fulltext
  */
@@ -11,10 +27,10 @@ class Ranker
     /**
      * Known ranking modes (ext2 only).
      */
-    const PROXIMITY_BM25 = 0; // default mode, phrase proximity major factor and BM25 minor one
-    const BM25 = 1; // statistical mode, BM25 ranking only (faster but worse quality
-    const NONE = 2; // no ranking, all matches get a weight of 1
-    const WORD_COUNT = 3; // simple word-count weighting, rank is a weighted sum of per-field keyword occurrence counts
+    const PROXIMITY_BM25 = 0;
+    const BM25 = 1;
+    const NONE = 2;
+    const WORD_COUNT = 3;
     const PROXIMITY = 4;
     const MATCH_ANY = 5;
     const FIELD_MASK = 6;
@@ -67,5 +83,25 @@ class Ranker
     {
         return $this->ranker;
     }
+
+    /**
+     * Sets ranking mode.
+     *
+     * @param $ranker
+     * @param string $rankExpr
+     *
+     * @throws SphinxClientException
+     * @return $this
+     */
+    public function setRankingMode($ranker, $rankExpr = "")
+    {
+        if (!($ranker === 0 || $ranker >= 1 && $ranker < Ranker::TOTAL)) {
+            throw new SphinxClientException('Ranker Mode is invalid');
+        }
+
+        $this->setRanker((int) $ranker);
+        $this->setRankExpr((string) $rankExpr);
+
+        return $this;
+    }
 }
- 

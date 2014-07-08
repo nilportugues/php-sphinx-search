@@ -5,6 +5,13 @@ namespace NilPortugues\Sphinx\Filter;
 use NilPortugues\Sphinx\SphinxClientException;
 
 /**
+ * Kept for compatibility issues.
+ */
+define ("SPH_FILTER_VALUES", Filter::VALUES);
+define ("SPH_FILTER_RANGE", Filter::RANGE);
+define ("SPH_FILTER_FLOATRANGE", Filter::FLOAT_RANGE);
+
+/**
  * Class Filter
  * @package NilPortugues\Sphinx\Filter
  */
@@ -28,8 +35,8 @@ class Filter
      * Set values for a set filter. Only matches records where $attribute value is in given set.
      *
      * @param $attribute
-     * @param  array $values
-     * @param  bool $exclude
+     * @param array $values
+     * @param bool  $exclude
      *
      * @return $this
      */
@@ -46,7 +53,7 @@ class Filter
 
                 $this->filters[] = array(
                     "type" => Filter::VALUES,
-                    "attr" => (string)$attribute,
+                    "attr" => (string) $attribute,
                     "exclude" => $exclude,
                     "values" => $values
                 );
@@ -97,9 +104,9 @@ class Filter
 
         $this->filters[] = array(
             "type" => Filter::RANGE,
-            "attr" => (string)$attribute,
-            "min" => (int)$min,
-            "max" => (int)$max,
+            "attr" => (string) $attribute,
+            "min" => (int) $min,
+            "max" => (int) $max,
             "exclude" => $this->convertToBoolean($exclude)
         );
 
@@ -134,7 +141,7 @@ class Filter
      * @param $attribute
      * @param $min
      * @param $max
-     * @param  bool $exclude
+     * @param bool $exclude
      *
      * @throws SphinxClientException
      * @return $this
@@ -147,9 +154,9 @@ class Filter
 
         $this->filters[] = array(
             "type" => self::FLOAT_RANGE,
-            "attr" => (string)$attribute,
-            "min" => (float)$min,
-            "max" => (float)$max,
+            "attr" => (string) $attribute,
+            "min" => (float) $min,
+            "max" => (float) $max,
             "exclude" => $this->convertToBoolean($exclude)
         );
 
@@ -169,4 +176,3 @@ class Filter
         return $this;
     }
 }
- 

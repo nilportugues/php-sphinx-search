@@ -58,4 +58,3 @@ class ErrorBag
         $this->warning = $warning;
     }
 }
- 

@@ -1,8 +1,11 @@
 <?php
 /**
  * @author: Andrew Aksyonoff
+ * @author: Nil Portugués <contact@nilportugues.com>
+ *
  * Copyright (c) 2001-2012, Andrew Aksyonoff
  * Copyright (c) 2008-2012, Sphinx Technologies Inc
+ *
  * All rights reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,84 +27,19 @@ use NilPortugues\Sphinx\Fulltext\Sorter;
 use NilPortugues\Sphinx\Fulltext\Ranker;
 use NilPortugues\Sphinx\Query\Attribute;
 use NilPortugues\Sphinx\Query\GroupBy;
+use NilPortugues\Sphinx\Query\Query;
 use NilPortugues\Sphinx\Searchd\Status;
 use NilPortugues\Sphinx\Searchd\Command;
 use NilPortugues\Sphinx\Searchd\Version;
 
 /**
- * PHP version of Sphinx searchd client.
+ * Class SphinxClient rewritten for modern PHP applications and code standards.
  *
- * @author Andrew Aksyonoff <andrew.aksyonoff@gmail.com>
+ * @package NilPortugues\Sphinx
+ * @author: Nil Portugués <contact@nilportugues.com>
  */
 class SphinxClient
 {
-    /**
-     * How many records to seek from result-set start (default is 0)
-     *
-     * @var int
-     */
-    private $offset = 0;
-
-    /**
-     * How many records to return from result-set starting at offset (default is 20)
-     *
-     * @var int
-     */
-    private $limit = 20;
-
-
-    /**
-     * Min ID to match (default is 0, which means no limit)
-     *
-     * @var int
-     */
-    private $minId = 0;
-
-    /**
-     * Max ID to match (default is 0, which means no limit)
-     *
-     * @var int
-     */
-    private $maxId = 0;
-
-    /**
-     * Max matches to retrieve
-     *
-     * @var int
-     */
-    private $maxMatches = 1500;
-
-    /**
-     * Cutoff to stop searching at (default is 0)
-     *
-     * @var int
-     */
-    private $cutOff = 0;
-
-
-    /**
-     * Geographical anchor point
-     *
-     * @var array
-     */
-    private $anchor;
-
-    /**
-     *  Whether $result["matches"] should be a hash or an array
-     *
-     * @var bool
-     */
-    private $arrayResult = false;
-
-
-
-
-
-    //These below should be kept. Above privates belong somewhere else.
-
-
-
-
     /**
      * @var Packer
      */
@@ -138,6 +76,11 @@ class SphinxClient
     private $errorBag;
 
     /**
+     * @var Query
+     */
+    private $query;
+
+    /**
      * Creates a new client object and fill defaults
      */
     public function __construct()
@@ -156,6 +99,7 @@ class SphinxClient
         $this->matcher = new Matcher();
         $this->queryGroupBy = new GroupBy();
         $this->queryAttribute = new Attribute();
+        $this->query = new Query();
 
     }
 
@@ -171,7 +115,7 @@ class SphinxClient
      * Sets the searchd host name and port.
      *
      * @param $host
-     * @param  int $port
+     * @param  int          $port
      * @return SphinxClient
      */
     public function setServer($host, $port = 0)
@@ -201,30 +145,39 @@ class SphinxClient
      * @param $limit
      * @param  int $max
      * @param  int $cutoff
+     * @throws SphinxClientException
      * @return SphinxClient
      */
     public function setLimits($offset, $limit, $max = 0, $cutoff = 0)
     {
-        assert($offset >= 0);
-        assert($limit > 0);
-        assert($max >= 0);
-        assert($cutoff >= 0);
+        $offset = (int) $offset;
+        $limit= (int) $limit;
+        $max = (int) $max;
+        $cutoff = (int) $cutoff;
 
-        $this->offset = (int)$offset;
-        $this->limit = (int)$limit;
-
-        if ($max > 0) {
-            $this->maxMatches = (int)$max;
+        if ($offset < 0) {
+            throw new SphinxClientException('Offset must be an integer above zero');
         }
 
-        if ($cutoff > 0) {
-            $this->cutOff = (int)$cutoff;
+        if ($limit < 0) {
+            throw new SphinxClientException('Limit must be an integer above zero');
         }
+
+        if($max < 0) {
+            throw new SphinxClientException('Max must be an integer above zero');
+        }
+
+        if($cutoff < 0) {
+            throw new SphinxClientException('CutOff must be an integer above zero');
+        }
+
+        $this->offset = $offset;
+        $this->limit = $limit;
+        $this->maxMatches = $max;
+        $this->cutOff = $cutoff;
 
         return $this;
     }
-
-
 
     /**
      * Sets a matching mode.
@@ -245,15 +198,12 @@ class SphinxClient
      * Sets ranking mode.
      *
      * @param $ranker
-     * @param  string $rankExpr
+     * @param  string       $rankExpr
      * @return SphinxClient
      */
     public function setRankingMode($ranker, $rankExpr = "")
     {
-        assert($ranker === 0 || $ranker >= 1 && $ranker < Ranker::TOTAL);
-
-        $this->ranker->setRanker((int) $ranker);
-        $this->ranker->setRankExpr((string) $rankExpr);
+        $this->ranker->setRankingMode($ranker, $rankExpr);
 
         return $this;
     }
@@ -262,7 +212,7 @@ class SphinxClient
      * Set matches sorting mode.
      *
      * @param $mode
-     * @param  string $sortBy
+     * @param string $sortBy
      *
      * @throws SphinxClientException
      * @return SphinxClient
@@ -274,20 +224,16 @@ class SphinxClient
         return $this;
     }
 
-
     /**
      * Set IDs range to match. Only match records if document ID is between $min and $max (inclusive)
      *
-     * @param int $min
-     * @param int $max
+     * @param  int   $min
+     * @param  int   $max
      * @return $this
      */
     public function setIDRange($min, $max)
     {
-        assert($min <= $max);
-
-        $this->minId = (int)$min;
-        $this->maxId = (int)$max;
+       $this->query->setIDRange($min, $max);
 
         return $this;
     }
@@ -296,8 +242,8 @@ class SphinxClient
      * Set values for a set filter. Only matches records where $attribute value is in given set.
      *
      * @param $attribute
-     * @param  array $values
-     * @param  bool $exclude
+     * @param  array        $values
+     * @param  bool         $exclude
      * @return SphinxClient
      */
     public function setFilter($attribute, array $values, $exclude = false)
@@ -307,12 +253,11 @@ class SphinxClient
         return $this;
     }
 
-
     /**
      * @param $attribute
      * @param $min
      * @param $max
-     * @param bool $exclude
+     * @param  bool  $exclude
      * @return $this
      */
     public function setFilterRange($attribute, $min, $max, $exclude = false)
@@ -328,7 +273,7 @@ class SphinxClient
      * @param $attribute
      * @param $min
      * @param $max
-     * @param  bool $exclude
+     * @param  bool         $exclude
      * @return SphinxClient
      */
     public function setFilterFloatRange($attribute, $min, $max, $exclude = false)
@@ -350,13 +295,7 @@ class SphinxClient
      */
     public function setGeoAnchor($attrlat, $attrlong, $lat, $long)
     {
-
-        $this->anchor = array(
-            "attrlat" => (string)$attrlat,
-            "attrlong" => (string)$attrlong,
-            "lat" => (float)$lat,
-            "long" => (float)$long
-        );
+        $this->query->setGeoAnchor($attrlat, $attrlong, $lat, $long);
 
         return $this;
     }
@@ -366,7 +305,7 @@ class SphinxClient
      *
      * @param $attribute
      * @param $func
-     * @param string $groupsort
+     * @param  string $groupsort
      * @return $this
      */
     public function setGroupBy($attribute, $func, $groupsort = "@group desc")
@@ -393,7 +332,7 @@ class SphinxClient
      * Sets distributed retries count and delay values.
      *
      * @param $count
-     * @param  int $delay
+     * @param  int          $delay
      * @return SphinxClient
      */
     public function setRetries($count, $delay = 0)
@@ -412,7 +351,7 @@ class SphinxClient
      */
     public function setArrayResult($arrayResult)
     {
-        $this->arrayResult = (bool)$arrayResult;
+        $this->arrayResult = (bool) $arrayResult;
 
         return $this;
     }
@@ -423,7 +362,7 @@ class SphinxClient
      *
      * @param $attributeName
      * @param $attributeType
-     * @param array $values
+     * @param  array $values
      * @return $this
      */
     public function setOverride($attributeName, $attributeType, array $values)
@@ -492,150 +431,20 @@ class SphinxClient
      */
     public function query($query, $index = "*", $comment = "")
     {
-        assert(empty($this->requests));
-
-        $this->AddQuery($query, $index, $comment);
-        $results = $this->RunQueries();
-        $this->requests = array(); // just in case it failed too early
-
-        if (!is_array($results))
-            return false; // probably network error; error message should be already filled
-
-        $this->error = $results[0]["error"];
-        $this->warning = $results[0]["warning"];
-        if ($results[0]["status"] == Status::ERROR)
-            return false;
-        else
-            return $results[0];
+        return $this->query->query($query, $index, $comment);
     }
 
     /**
-     * @TODO: NEEDS TO REPLACE ALMOST EVERY PRIVATE VAR REFERENCE FOR THE OBJECT GETTER OR SETTER.
-     *
-     *
      * Adds a query to a multi-query batch. Returns index into results array from RunQueries() call.
      *
      * @param $query
-     * @param  string $index
-     * @param  string $comment
+     * @param string $index
+     * @param string $comment
      * @return int
      */
     public function addQuery($query, $index = "*", $comment = "")
     {
-        // mbstring workaround
-        $this->multiByte->Push();
-
-
-        // build request
-        $req = pack("NNNN", $this->offset, $this->limit, $this->mode, $this->ranker);
-        if ($this->ranker->getRanker() == Ranker::EXPR) {
-            $req .= pack("N", strlen($this->ranker->getRankExpr())) . $this->ranker->getRankExpr();
-        }
-
-        $req .= pack("N", $this->sort); // (deprecated) sort mode
-        $req .= pack("N", strlen($this->sortBy)) . $this->sortBy;
-        $req .= pack("N", strlen($query)) . $query; // query itself
-        $req .= pack("N", count($this->weights)); // weights
-        foreach ($this->weights as $weight)
-            $req .= pack("N", (int)$weight);
-        $req .= pack("N", strlen($index)) . $index; // indexes
-        $req .= pack("N", 1); // id64 range marker
-        $req .= $this->packer->sphPackU64($this->minId) . $this->packer->sphPackU64($this->maxId); // id64 range
-
-        // filters
-        $req .= pack("N", count($this->filters));
-        foreach ($this->filters as $filter) {
-            $req .= pack("N", strlen($filter["attr"])) . $filter["attr"];
-            $req .= pack("N", $filter["type"]);
-            switch ($filter["type"]) {
-                case Filter::VALUES:
-                    $req .= pack("N", count($filter["values"]));
-                    foreach ($filter["values"] as $value)
-                        $req .= $this->packer->sphPackI64($value);
-                    break;
-
-                case Filter::RANGE:
-                    $req .= $this->packer->sphPackI64($filter["min"]) . $this->packer->sphPackI64($filter["max"]);
-                    break;
-
-                case Filter::FLOAT_RANGE:
-                    $req .= $this->packer->packFloat($filter["min"]) . $this->packer->packFloat($filter["max"]);
-                    break;
-
-                default:
-                    assert(0 && "internal error: unhandled filter type");
-            }
-            $req .= pack("N", $filter["exclude"]);
-        }
-
-        // group-by clause, max-matches count, group-sort clause, cutoff count
-        $req .= pack("NN", $this->groupFunc, strlen($this->groupBy)) . $this->groupBy;
-        $req .= pack("N", $this->maxMatches);
-        $req .= pack("N", strlen($this->groupSort)) . $this->groupSort;
-        $req .= pack("NNN", $this->cutOff, $this->retryCount, $this->retryDelay);
-        $req .= pack("N", strlen($this->groupDistinct)) . $this->groupDistinct;
-
-        // anchor point
-        if (empty($this->anchor)) {
-            $req .= pack("N", 0);
-        } else {
-            $a =& $this->anchor;
-            $req .= pack("N", 1);
-            $req .= pack("N", strlen($a["attrlat"])) . $a["attrlat"];
-            $req .= pack("N", strlen($a["attrlong"])) . $a["attrlong"];
-            $req .= $this->packer->packFloat($a["lat"]) . $this->packer->packFloat($a["long"]);
-        }
-
-        // per-index weights
-        $req .= pack("N", count($this->indexWeights));
-        foreach ($this->indexWeights as $idx => $weight)
-            $req .= pack("N", strlen($idx)) . $idx . pack("N", $weight);
-
-        // max query time
-        $req .= pack("N", $this->maxQueryTime);
-
-        // per-field weights
-        $req .= pack("N", count($this->fieldWeights));
-        foreach ($this->fieldWeights as $field => $weight)
-            $req .= pack("N", strlen($field)) . $field . pack("N", $weight);
-
-        // comment
-        $req .= pack("N", strlen($comment)) . $comment;
-
-        // attribute overrides
-        $req .= pack("N", count($this->overrides));
-        foreach ($this->overrides as $entry) {
-            $req .= pack("N", strlen($entry["attr"])) . $entry["attr"];
-            $req .= pack("NN", $entry["type"], count($entry["values"]));
-            foreach ($entry["values"] as $id => $val) {
-                assert(is_numeric($id));
-                assert(is_numeric($val));
-
-                $req .= $this->packer->sphPackU64($id);
-                switch ($entry["type"]) {
-                    case Attribute::FLOAT:
-                        $req .= $this->packer->packFloat($val);
-                        break;
-                    case Attribute::BIGINT:
-                        $req .= $this->packer->sphPackI64($val);
-                        break;
-                    default:
-                        $req .= pack("N", $val);
-                        break;
-                }
-            }
-        }
-
-        // select-list
-        $req .= pack("N", strlen($this->select)) . $this->select;
-
-        // mbstring workaround
-        $this->multiByte->Pop();
-
-        // store request to requests array
-        $this->requests[] = $req;
-
-        return count($this->requests) - 1;
+        return $this->query->addQuery($query, $index, $comment);
     }
 
     /**
@@ -646,15 +455,17 @@ class SphinxClient
     public function runQueries()
     {
         if (empty($this->requests)) {
-            $this->error = "no queries defined, issue AddQuery() first";
+            $this->errorBag->setError("no queries defined, issue AddQuery() first");
+
             return false;
         }
 
         // mbstring workaround
-        $this->multiByte->Push();
+        $this->multiByte->push();
 
         if (!($fp = $this->connection->connect())) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
+
             return false;
         }
 
@@ -667,7 +478,7 @@ class SphinxClient
         if (!($this->connection->send($fp, $req, $len + 8)) ||
             !($response = $this->response->getResponse($fp, Version::SEARCH))
         ) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
 
             return false;
         }
@@ -676,17 +487,30 @@ class SphinxClient
         $this->requests = array();
 
         // parse and return response
-        return $this->_ParseSearchResponse($response, $nreqs);
+        return $this->response->parseSearchResponse($response, $nreqs);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Connects to Searchd server, and generate excerpts (snippets) of given documents for given query.
      * Returns false on failure, or an array of snippets on success.
      *
-     * @param array $docs
+     * @param  array $docs
      * @param $index
      * @param $words
-     * @param array $options
+     * @param  array $options
      * @return array
      */
     public function buildExcerpts(array $docs, $index, $words, array $options = array())
@@ -694,10 +518,11 @@ class SphinxClient
         $index = (string) $index;
         $words = (string) $words;
 
-        $this->multiByte->Push();
+        $this->multiByte->push();
 
         if (!($fp = $this->connection->connect())) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
+
             return array();
         }
 
@@ -716,7 +541,8 @@ class SphinxClient
         if (!($this->connection->send($fp, $requestMessage, strlen($requestBody) + 8)) ||
             !($response = $this->response->getResponse($fp, Version::EXCERPT))
         ) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
+
             return array();
         }
 
@@ -753,7 +579,7 @@ class SphinxClient
     }
 
     /**
-     * @param array $options
+     * @param  array  $options
      * @return string
      */
     private function buildRequestFlags(array &$options)
@@ -820,16 +646,16 @@ class SphinxClient
     }
 
     /**
-     * @param array $options
+     * @param  array  $options
      * @return string
      */
     private function buildRequestOptions(array &$options)
     {
-        $options["limit"] = (int)$options["limit"];
-        $options["around"] = (int)$options["around"];
-        $options["limit_passages"] = (int)$options["limit_passages"];
-        $options["limit_words"] = (int)$options["limit_words"];
-        $options["start_passage_id"] = (int)$options["start_passage_id"];
+        $options["limit"] = (int) $options["limit"];
+        $options["around"] = (int) $options["around"];
+        $options["limit_passages"] = (int) $options["limit_passages"];
+        $options["limit_words"] = (int) $options["limit_words"];
+        $options["start_passage_id"] = (int) $options["start_passage_id"];
 
         $request = pack("N", strlen($options["before_match"]))
             . $options["before_match"]
@@ -859,6 +685,7 @@ class SphinxClient
             assert(is_string($doc));
             $request .= pack("N", strlen($doc)) . $doc;
         }
+
         return $request;
     }
 
@@ -869,6 +696,7 @@ class SphinxClient
     private function buildRequest($requestBody)
     {
         $messageLength = strlen($requestBody);
+
         return pack("nnN", Command::EXCERPT, Version::EXCERPT, $messageLength) . $requestBody;
     }
 
@@ -888,8 +716,9 @@ class SphinxClient
             $pos += 4;
 
             if ($pos + $len > $rlen) {
-                $this->error = "incomplete reply";
+                $this->errorBag->setError("incomplete reply");
                 $this->multiByte->pop();
+
                 return array();
             }
 
@@ -901,6 +730,52 @@ class SphinxClient
 
         return $res;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * connects to searchd server, and generates a keyword list for a given query.
@@ -921,6 +796,7 @@ class SphinxClient
 
         if (!($fp = $this->connection->connect())) {
             $this->multiByte->pop();
+
             return array();
         }
 
@@ -931,7 +807,7 @@ class SphinxClient
         // v.1.0 req
         $req = pack("N", strlen($query)) . $query; // req query
         $req .= pack("N", strlen($index)) . $index; // req index
-        $req .= pack("N", (int)$hits);
+        $req .= pack("N", (int) $hits);
 
         ////////////////////////////
         // send query, get response
@@ -942,7 +818,7 @@ class SphinxClient
         if (!($this->connection->send($fp, $req, $len + 8)) ||
             !($response = $this->response->getResponse($fp, Version::KEYWORDS))
         ) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
 
             return array();
         }
@@ -984,8 +860,9 @@ class SphinxClient
 
             if ($pos > $rlen) {
 
-                $this->error = "incomplete reply";
+                $this->errorBag->setError("incomplete reply");
                 $this->multiByte->pop();
+
                 return array();
             }
         }
@@ -1016,14 +893,13 @@ class SphinxClient
      * @param $index
      * @param  array $attributes
      * @param  array $values
-     * @param  bool $mva
+     * @param  bool  $mva
      * @return int
      */
     public function updateAttributes($index, array $attributes, array $values, $mva = false)
     {
-        $mva = (bool)$mva;
-        $index = (string)$index;
-
+        $mva = (bool) $mva;
+        $index = (string) $index;
 
         assert(is_array($attributes));
         foreach ($attributes as $attribute) {
@@ -1079,6 +955,7 @@ class SphinxClient
         // connect, send query, get response
         if (!($fp = $this->connection->connect())) {
             $this->multiByte->pop();
+
             return -1;
         }
 
@@ -1087,11 +964,13 @@ class SphinxClient
 
         if (!$this->connection->send($fp, $req, $len + 8)) {
             $this->multiByte->pop();
+
             return -1;
         }
 
         if (!($response = $this->response->getResponse($fp, Version::UPDATE))) {
             $this->multiByte->pop();
+
             return -1;
         }
 
@@ -1118,7 +997,7 @@ class SphinxClient
         if (!($this->connection->send($fp, $req, 8)) ||
             !($response = $this->response->getResponse($fp, Version::FLUSHATTRS))
         ) {
-            $this->multiByte->Pop();
+            $this->multiByte->pop();
 
             return -1;
         }
@@ -1127,7 +1006,7 @@ class SphinxClient
         if (strlen($response) == 4)
             list(, $tag) = unpack("N*", $response);
         else
-            $this->error = "unexpected response length";
+            $this->errorBag->setError("unexpected response length");
 
         $this->multiByte->pop();
 

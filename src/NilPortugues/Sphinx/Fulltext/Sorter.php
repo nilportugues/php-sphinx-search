@@ -1,7 +1,18 @@
 <?php
 
 namespace NilPortugues\Sphinx\Fulltext;
+
 use NilPortugues\Sphinx\SphinxClientException;
+
+/**
+ * Kept for compatibility issues.
+ */
+define ("SPH_SORT_RELEVANCE", Sorter::RELEVANCE);
+define ("SPH_SORT_ATTR_DESC", Sorter::ATTR_DESC);
+define ("SPH_SORT_ATTR_ASC", Sorter::ATTR_ASC);
+define ("SPH_SORT_TIME_SEGMENTS", Sorter::TIME_SEGMENTS);
+define ("SPH_SORT_EXTENDED", Sorter::EXTENDED);
+define ("SPH_SORT_EXPR", Sorter::EXPR);
 
 /**
  * Class Sorter
@@ -18,7 +29,6 @@ class Sorter
     const TIME_SEGMENTS = 3;
     const EXTENDED = 4;
     const EXPR = 5;
-
 
     /**
      * @var int
@@ -79,10 +89,9 @@ class Sorter
             throw new SphinxClientException('Sorting mode is not valid');
         }
 
-        $this->sort = (int)$mode;
-        $this->sortBy = (string)$sortBy;
+        $this->sort = (int) $mode;
+        $this->sortBy = (string) $sortBy;
 
         return $this;
     }
 }
- 
