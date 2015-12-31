@@ -26,6 +26,5 @@ before_script:
   - sudo chmod 777 /usr/bin/searchd
   - sudo chmod 777 /usr/bin/indexer
   - indexer --all
-  - search "Spider"
   - searchd
 
