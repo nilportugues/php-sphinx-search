@@ -23,8 +23,8 @@ before_script:
   - composer install
   ## Set up a MySQL database to test Sphinx
   - mysql -e "create database testDB; use testDB; CREATE TABLE IF NOT EXISTS movies ( id int(11) NOT NULL AUTO_INCREMENT,  title varchar(255) COLLATE utf8_unicode_ci NOT NULL,  year int(11) NOT NULL,   PRIMARY KEY (id) ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=7 ; INSERT INTO movies (id, title, year) VALUES (1, 'The Amazing Spider-Man', 2012),(2, 'The Amazing Spider-Man 2', 2014),(3, 'Spider-Man 2', 2004),(4, 'Spider-Man 3', 2007),(5, 'Spider-Man', 2002),(6, 'Spider-Man', 1977);" > /dev/null
-  - chmod 777 /usr/bin/searchd
-  - chmod 777 /usr/bin/indexer
+  - sudo chmod 777 /usr/bin/searchd
+  - sudo chmod 777 /usr/bin/indexer
   - indexer --all
   - search "Spider"
   - searchd
