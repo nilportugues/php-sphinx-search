@@ -16,7 +16,7 @@ matrix:
 
 before_script:
   ## Some info for debugging...
-  - add-apt-repository ppa:builds/sphinxsearch-rel22
+  - add-apt-repository ppa:builds/sphinxsearch
   - apt-get update
   - apt-get install sphinxsearch
   ## Install Composer
