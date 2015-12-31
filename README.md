@@ -1,6 +1,6 @@
-# [![Build Status](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx.png?branch=master)](https://travis-ci.org/nilopc/NilPortugues_PHP_Sphinx) Sphinx for PHP 5.3 and above
-
-[![Latest Stable Version](https://poser.pugx.org/nilportugues/sphinx-search/v/stable.svg)](https://packagist.org/packages/nilportugues/sphinx-search) [![Total Downloads](https://poser.pugx.org/nilportugues/sphinx-search/downloads.svg)](https://packagist.org/packages/nilportugues/sphinx-search) [![Latest Unstable Version](https://poser.pugx.org/nilportugues/sphinx-search/v/unstable.svg)](https://packagist.org/packages/nilportugues/sphinx-search) [![License](https://poser.pugx.org/nilportugues/sphinx-search/license.svg)](https://packagist.org/packages/nilportugues/sphinx-search)
+# Sphinx for PHP 5.3 and above
+[![Build Status](https://travis-ci.org/nilportugues/php-sphinx-search.png?branch=master)](https://travis-ci.org/nilportugues/php-sphinx-search) 
+[![Latest Stable Version](https://poser.pugx.org/nilportugues/sphinx-search/v/stable.svg)](https://packagist.org/packages/nilportugues/sphinx-search) [![Total Downloads](https://poser.pugx.org/nilportugues/sphinx-search/downloads.svg)](https://packagist.org/packages/nilportugues/sphinx-search)  [![License](https://poser.pugx.org/nilportugues/sphinx-search/license.svg)](https://packagist.org/packages/nilportugues/sphinx-search)
 
 This class is a port of the original Sphinx API class by **Andrew Aksyonoff** and [Sphinx Technologies Inc][1] to PHP 5.3 and above.
 
