@@ -17,7 +17,8 @@ matrix:
 before_script:
   ## Install Sphinx
   - sudo apt-get install mysql-client odbcinst1debian2 libodbc1 odbcinst libpq5
-  - sudo dpkg -i sphinxsearch_2.2.10-release-0ubuntu12~trusty_amd64.deb
+  - wget http://sphinxsearch.com/files/sphinxsearch_2.2.10-release-0ubuntu12~precise_amd64.deb
+  - sudo dpkg -i sphinxsearch_2.2.10-release-0ubuntu12~precise_amd64.deb
   ## Install Composer
   - composer install
   ## Set up a MySQL database to test Sphinx
