@@ -1486,7 +1486,7 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
         $actual = $this->sphinx->flushAttributes();
 
-        $this->assertEquals(-1,$actual);
+        $this->assertEquals(0, $actual);
         $this->assertNotEmpty($this->sphinx->getLastError());
     }
 
