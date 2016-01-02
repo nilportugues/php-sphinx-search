@@ -1481,16 +1481,6 @@ class SphinxClientTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    public function testFlushAttributesError()
-    {
-        $this->sphinx = new \NilPortugues\Sphinx\SphinxClient();
-        $this->sphinx->updateAttributes('movies',array('year'), array(2020 => array(2040)) );
-        $actual = $this->sphinx->flushAttributes();
-
-        $this->assertEquals(-1, $actual);
-        $this->assertNotEmpty($this->sphinx->getLastError());
-    }
-
     /**
      * Needs a valid Sphinx.conf loaded with the provided movies.sql to indexer to be tested properly.
      */
