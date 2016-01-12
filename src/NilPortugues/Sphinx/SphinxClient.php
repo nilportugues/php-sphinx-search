@@ -254,9 +254,11 @@ class SphinxClient
         assert(is_string($host));
         if ($host[0] == '/') {
             $this->_path = 'unix://' . $host;
+            return;
         }
         if (substr($host, 0, 7) == "unix://") {
             $this->_path = $host;
+            return;
         }
 
         $this->_host = $host;
