@@ -107,6 +107,7 @@ define ("SPH_GROUPBY_MONTH", 2);
 define ("SPH_GROUPBY_YEAR", 3);
 define ("SPH_GROUPBY_ATTR", 4);
 define ("SPH_GROUPBY_ATTRPAIR", 5);
+define ("SPH_GROUPBY_MULTIPLE", 6);
 
 /**
  * PHP version of Sphinx searchd client.
@@ -563,7 +564,8 @@ class SphinxClient
             || $func == SPH_GROUPBY_MONTH
             || $func == SPH_GROUPBY_YEAR
             || $func == SPH_GROUPBY_ATTR
-            || $func == SPH_GROUPBY_ATTRPAIR);
+            || $func == SPH_GROUPBY_ATTRPAIR
+            || $func == SPH_GROUPBY_MULTIPLE);
 
         $this->_groupby = $attribute;
         $this->_groupfunc = $func;
